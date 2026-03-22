@@ -1,0 +1,213 @@
+// Represents a point on a 2d plane, or a 2d direction.
+interface Vector2 {
+	x: number,
+	y: number
+}
+
+// Represents a single room
+class Room {
+	// Name of the room
+	name: string;
+	// Image path to the room
+	backgroundImage: string;
+
+	// Determines the background image's zoom level
+	zoom: number = 1.0;
+
+	// Positions of the professors
+	sandroPosition: Vector2;
+	bilitskiPosition: Vector2;
+	ohlPosition: Vector2;
+	deepakPosition: Vector2;
+
+	constructor(name: string, backgroundImage: string, sandro: Vector2, bilitski: Vector2, ohl: Vector2, deepak: Vector2) {
+		this.name = name;
+		this.backgroundImage = backgroundImage;
+		this.sandroPosition = sandro;
+		this.bilitskiPosition = bilitski;
+		this.ohlPosition = ohl;
+		this.deepakPosition = deepak;
+	}
+
+	setZoom(zoom : number): void {
+		this.zoom = zoom;
+	}
+
+	// Returns the size of the room's background image, taking scales and zooms into account.
+	getSize(): Vector2 {
+		return { x: roomImg.naturalWidth * windowScale * this.zoom, y: roomImg.naturalHeight * windowScale * this.zoom };
+	}
+}
+
+// Represents a professor
+class Professor {
+	name: string;
+	room!: Room // The room this professor is currently in
+	root: HTMLDivElement; // Reference to the sprite's root div element
+	sprite: HTMLImageElement; // Reference to the sprite's img element
+	scale: Vector2; // Sprite's scale
+
+	constructor(name: string, root: HTMLDivElement, sprite: HTMLImageElement) {
+		this.name = name;
+		this.root = root;
+		this.sprite = sprite;
+		this.scale = { x: 1.0, y: 1.0 };
+	}
+
+	isVisible(): boolean {
+		return this.room == currentRoom;
+	}
+
+	setRoom(newRoom: Room): void {
+		this.room = newRoom;
+	}
+
+	setScale(newScale: Vector2): void {
+		this.scale = newScale;
+
+		const scaledSize: Vector2 = this.getScaledSize();
+		this.sprite.style.width = `${scaledSize.x}px`;
+		this.sprite.style.height = `${scaledSize.y}px`;
+	}
+
+	getScaledSize(): Vector2 {
+		return { x: this.sprite.naturalWidth * this.scale.x * windowScale, y: this.sprite.naturalHeight * this.scale.y * windowScale };
+	}
+
+	// Sets the professor's current sprite.
+	setSprite(newSrc: string): void {
+		this.sprite.src = `img/${newSrc}.png`;
+		this.centerSprite();
+	}
+
+	// Centers the sprite, taking the local scale into account.
+	centerSprite(): void {
+		const scaledSize: Vector2 = this.getScaledSize();
+		// Keep sprite centered on parent
+		this.sprite.style.left = `-${scaledSize.x * 0.5}px`;
+		this.sprite.style.top = `-${scaledSize.y * 0.5}px`;
+	}
+
+	// Called from redrawRoom()
+	redraw(): void {
+		// Apply position
+		const position: Vector2 = this.getPosition();
+		this.root.style.left = `${position.x * windowScale}px`;
+		this.root.style.top = `${position.y * windowScale}px`;
+		this.root.style.visibility = this.isVisible() ? 'visible' : 'hidden'; // Apply visibility
+	}
+
+	// Returns the position of this professor in the current room.
+	getPosition(): Vector2 {
+		switch (this.name) {
+			case SANDRO_KEY:
+				return currentRoom.sandroPosition;
+			case BILTISKI_KEY:
+				return currentRoom.bilitskiPosition;
+			case OHL_KEY:
+				return currentRoom.ohlPosition;
+			case DEEPAK_KEY:
+				return currentRoom.deepakPosition;
+		}
+
+		return { x: 0, y: 0 };
+	}
+}
+
+// Keys for professors
+const SANDRO_KEY: string = 'sandro';
+const BILTISKI_KEY: string = 'bilitski';
+const OHL_KEY: string = 'ohl';
+const DEEPAK_KEY: string = 'deepak';
+
+// Global references to game elements
+const room: HTMLDivElement = document.querySelector('#room') as HTMLDivElement;
+const roomImg: HTMLImageElement = document.querySelector('#room-img') as HTMLImageElement;
+const sandro: Professor = createProfessor(SANDRO_KEY);
+const bilitski: Professor = createProfessor(BILTISKI_KEY);
+const ohl: Professor = createProfessor(OHL_KEY);
+const deepak: Professor = createProfessor(DEEPAK_KEY);
+
+// Test rooms
+const room1: Room = new Room('stage', 'stage', { x: 100, y: 50 }, { x: 10, y: 200 }, { x: 200, y: 100 }, { x: 500, y: 50 });
+room1.setZoom(0.2);
+const room2: Room = new Room('help_desk', 'door closed', { x: 100, y: 0 }, { x: 10, y: 0 }, { x: 200, y: 0 }, { x: 500, y: 0 });
+room2.setZoom(0.2);
+// The current room the player is in
+let currentRoom: Room = room1;
+
+// Redraws the current room
+function redrawRoom(): void {
+	// Update room
+	roomImg.src = `img/background/${currentRoom.backgroundImage}.jpg`;
+	let scaledSize: Vector2 = currentRoom.getSize();
+	roomImg.style.width = `${scaledSize.x}px`;
+	roomImg.style.height = `${scaledSize.y}px`;
+
+	sandro.redraw();
+	bilitski.redraw();
+	ohl.redraw();
+	deepak.redraw();
+}
+
+// Creates a professor object and adds it as a child of the room element.
+function createProfessor(name: string): Professor {
+	// Create root div
+	const rootElement: HTMLDivElement = document.createElement('div');
+	rootElement.classList.add('professor-rect')
+
+	// Create img element
+	const spriteElement: HTMLImageElement = document.createElement('img');
+	spriteElement.classList.add('professor-sprite');
+	rootElement.appendChild(spriteElement);
+
+	const professor = new Professor(name, rootElement, spriteElement);
+	professor.setSprite(name);
+
+	room.appendChild(rootElement); // Add professor div to the game screen
+	return professor;
+}
+
+function changeRoom(newRoom: Room): void {
+	// TODO Hide old sprites, show new sprites
+	currentRoom = newRoom;
+}
+
+// TODO Replace this with proper camera system 
+document.addEventListener('keydown', (e : KeyboardEvent) => {
+	if(currentRoom == room1)
+		changeRoom(room2);
+	else
+		changeRoom(room1);
+
+	// TODO Make these based on movement patterns
+	sandro.setRoom(room2);
+	bilitski.setRoom(room1);
+	ohl.setRoom(room2);
+	deepak.setRoom(room1);
+	redrawRoom();
+});
+
+
+// Reference size of the window. Everything will resize based on this resolution
+const BASE_WINDOW_SIZE = { x: 800, y: 600 };
+// Current window scale based on the reference resolution. Updated whenever the window resizes.
+let windowScale = calculateWindowScale();
+// Returns the scale ratio of the current window
+function calculateWindowScale(): number {
+	let rect : DOMRect = room.getBoundingClientRect();
+	return rect.width / BASE_WINDOW_SIZE.x;
+}
+
+// Handle window resizing
+window.addEventListener('resize', (_e) => {
+	windowScale = calculateWindowScale(); // Update window scale
+
+	// Force objects to re-scale
+	sandro.setScale(sandro.scale);
+	bilitski.setScale(bilitski.scale);
+	ohl.setScale(ohl.scale);
+	deepak.setScale(deepak.scale);
+
+	redrawRoom();
+});
