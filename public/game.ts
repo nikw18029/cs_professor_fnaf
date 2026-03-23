@@ -15,22 +15,35 @@ class Room {
 	zoom: number = 1.0;
 
 	// Positions of the professors
-	sandroPosition: Vector2;
-	bilitskiPosition: Vector2;
-	ohlPosition: Vector2;
-	deepakPosition: Vector2;
+	sandroPosition: Vector2 = { x : 0, y : 0 };
+	bilitskiPosition: Vector2 = { x : 0, y : 0 };
+	ohlPosition: Vector2 = { x : 0, y : 0 };
+	deepakPosition: Vector2 = { x : 0, y : 0 };
 
-	constructor(name: string, backgroundImage: string, sandro: Vector2, bilitski: Vector2, ohl: Vector2, deepak: Vector2) {
+	constructor(name: string, backgroundImage: string) {
 		this.name = name;
 		this.backgroundImage = backgroundImage;
-		this.sandroPosition = sandro;
-		this.bilitskiPosition = bilitski;
-		this.ohlPosition = ohl;
-		this.deepakPosition = deepak;
 	}
 
-	setZoom(zoom : number): void {
+	// Call this to set the position of a particular professor. Returns the room so you can chain room setup.
+	setProfessorPosition(key : string, position : Vector2): Room {
+		switch (key) {
+			case SANDRO_KEY:
+				this.sandroPosition = position;
+			case BILTISKI_KEY:
+				this.bilitskiPosition = position;
+			case OHL_KEY:
+				this.ohlPosition = position;
+			case DEEPAK_KEY:
+				this.deepakPosition = position;
+		}
+
+		return this;
+	}
+
+	setZoom(zoom : number): Room {
 		this.zoom = zoom;
+		return this;
 	}
 
 	// Returns the size of the room's background image, taking scales and zooms into account.
@@ -129,10 +142,20 @@ const ohl: Professor = createProfessor(OHL_KEY);
 const deepak: Professor = createProfessor(DEEPAK_KEY);
 
 // Test rooms
-const room1: Room = new Room('stage', 'stage', { x: 100, y: 50 }, { x: 10, y: 200 }, { x: 200, y: 100 }, { x: 500, y: 50 });
-room1.setZoom(0.2);
-const room2: Room = new Room('help_desk', 'door closed', { x: 100, y: 0 }, { x: 10, y: 0 }, { x: 200, y: 0 }, { x: 500, y: 0 });
-room2.setZoom(0.2);
+const room1: Room = new Room('stage', 'stage')
+	.setProfessorPosition(SANDRO_KEY, { x: 100, y: 50 })
+	.setProfessorPosition(BILTISKI_KEY, { x: 10, y: 200 })
+	.setProfessorPosition(OHL_KEY, { x: 200, y: 100 })
+	.setProfessorPosition(DEEPAK_KEY, { x: 500, y: 50 })
+	.setZoom(0.2);
+
+const room2: Room = new Room('help_desk', 'door closed')
+	.setProfessorPosition(SANDRO_KEY, { x: 100, y: 0 })
+	.setProfessorPosition(BILTISKI_KEY, { x: 10, y: 0 })
+	.setProfessorPosition(OHL_KEY, { x: 200, y: 0 })
+	.setProfessorPosition(DEEPAK_KEY, { x: 500, y: 0 })
+	.setZoom(0.2);
+
 // The current room the player is in
 let currentRoom: Room = room1;
 
