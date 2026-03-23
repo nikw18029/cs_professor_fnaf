@@ -1,17 +1,33 @@
 // Represents a single room
 var Room = /** @class */ (function () {
-    function Room(name, backgroundImage, sandro, bilitski, ohl, deepak) {
+    function Room(name, backgroundImage) {
         // Determines the background image's zoom level
         this.zoom = 1.0;
+        // Positions of the professors
+        this.sandroPosition = { x: 0, y: 0 };
+        this.bilitskiPosition = { x: 0, y: 0 };
+        this.ohlPosition = { x: 0, y: 0 };
+        this.deepakPosition = { x: 0, y: 0 };
         this.name = name;
         this.backgroundImage = backgroundImage;
-        this.sandroPosition = sandro;
-        this.bilitskiPosition = bilitski;
-        this.ohlPosition = ohl;
-        this.deepakPosition = deepak;
     }
+    // Call this to set the position of a particular professor. Returns the room so you can chain room setup.
+    Room.prototype.setProfessorPosition = function (key, position) {
+        switch (key) {
+            case SANDRO_KEY:
+                this.sandroPosition = position;
+            case BILTISKI_KEY:
+                this.bilitskiPosition = position;
+            case OHL_KEY:
+                this.ohlPosition = position;
+            case DEEPAK_KEY:
+                this.deepakPosition = position;
+        }
+        return this;
+    };
     Room.prototype.setZoom = function (zoom) {
         this.zoom = zoom;
+        return this;
     };
     // Returns the size of the room's background image, taking scales and zooms into account.
     Room.prototype.getSize = function () {
@@ -91,10 +107,18 @@ var bilitski = createProfessor(BILTISKI_KEY);
 var ohl = createProfessor(OHL_KEY);
 var deepak = createProfessor(DEEPAK_KEY);
 // Test rooms
-var room1 = new Room('stage', 'stage', { x: 100, y: 50 }, { x: 10, y: 200 }, { x: 200, y: 100 }, { x: 500, y: 50 });
-room1.setZoom(0.2);
-var room2 = new Room('help_desk', 'door closed', { x: 100, y: 0 }, { x: 10, y: 0 }, { x: 200, y: 0 }, { x: 500, y: 0 });
-room2.setZoom(0.2);
+var room1 = new Room('stage', 'stage')
+    .setProfessorPosition(SANDRO_KEY, { x: 100, y: 50 })
+    .setProfessorPosition(BILTISKI_KEY, { x: 10, y: 200 })
+    .setProfessorPosition(OHL_KEY, { x: 200, y: 100 })
+    .setProfessorPosition(DEEPAK_KEY, { x: 500, y: 50 })
+    .setZoom(0.2);
+var room2 = new Room('help_desk', 'door closed')
+    .setProfessorPosition(SANDRO_KEY, { x: 100, y: 0 })
+    .setProfessorPosition(BILTISKI_KEY, { x: 10, y: 0 })
+    .setProfessorPosition(OHL_KEY, { x: 200, y: 0 })
+    .setProfessorPosition(DEEPAK_KEY, { x: 500, y: 0 })
+    .setZoom(0.2);
 // The current room the player is in
 var currentRoom = room1;
 // Redraws the current room
