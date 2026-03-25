@@ -1,0 +1,1 @@
+{"version":3,"file":"character.d.ts","sourceRoot":"","sources":["../src/character.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,IAAI,EAAE,MAAM,QAAQ,CAAA;AAI7B,qBAAa,SAAS;IAClB,SAAgB,IAAI,SAAC;IACd,SAAS,SAAK;IACrB,OAAO,CAAC,cAAc,CAAC;gBAEX,IAAI,EAAE,MAAM,EAAE,cAAc,EAAE,IAAI,EAAE;CAKnD"}
