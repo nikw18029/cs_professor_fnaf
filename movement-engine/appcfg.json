@@ -1,0 +1,6 @@
+{
+    "tick": 100,
+    "Dummy": 5,
+    "moveDelay": 5,
+    "logger": "trace"
+}

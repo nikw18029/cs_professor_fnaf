@@ -1,0 +1,1 @@
+{"version":3,"file":"character.js","sourceRoot":"","sources":["../src/character.ts"],"names":[],"mappings":";;;AAIA,MAAa,SAAS;IACF,IAAI,CAAC;IACd,SAAS,GAAG,CAAC,CAAC;IACb,cAAc,CAAC;IAEvB,YAAY,IAAY,EAAE,cAAsB;QAC5C,IAAI,CAAC,IAAI,GAAG,IAAI,CAAC;QACjB,IAAI,CAAC,cAAc,GAAG,cAAc,CAAC;IAEzC,CAAC;CACJ;AAVD,8BAUC"}
