@@ -7,6 +7,7 @@ import { Observable } from "./observable.js";
  * A character that can move and trigger an attack
  */
 export class Character {
+    /**Must be verbaitum what is in appcfg*/
     public readonly name: string;
     public readonly AI_LVL: number;
     private preferredRooms: Set<Room>;
@@ -31,20 +32,27 @@ export class Character {
     private pickNextRoom(): Room {
         const preferredNeighbors: Room[] = [];
         for (const neighbor of this.currentRoom.neighbors) {
-            if (this.preferredRooms.has(neighbor)) {
+            if(neighbor.isPlayerRoom){  // Prefer player room: if one of the neigbhors is the player's room, make this more likely
+                                        // to choose player's room and skip room selection. Scales with ai lvl
+                let roll = Math.floor(Math.random() * 20) + 1;
+                if(roll <= this.AI_LVL){
+                    return neighbor;
+                }
+
+            }else if (this.preferredRooms.has(neighbor)) {
                 preferredNeighbors.push(neighbor);
             }
         }
 
         const pool = preferredNeighbors.length > 0
             ? preferredNeighbors
-            : Array.from(this.currentRoom.neighbors);
+            : Array.from(this.currentRoom.neighbors);   // as a fallback if none of the neighbors are preferred then any neighbors are an option
 
         if (pool.length === 0) {
             Logger.critical(`Character ${this.name} failed to pick a room.`);
         }
 
-        return pool[Math.floor(Math.random() * pool.length)] as Room;
+        return pool[Math.floor(Math.random() * pool.length)] as Room;   // if player room is failed to roll earlier it can still be selected here.
     }
 
     private moveInto(newRoom: Room) {
@@ -55,7 +63,7 @@ export class Character {
     }
 
     /**
-     * Flags the character to stop moving, will stop next time it attempts to move.
+     * Flags the character to stop moving, will stop all loops next time it attempts to move.
      */
     public stop() { this.active = false }
 
@@ -80,7 +88,7 @@ export class Character {
                 if (nextRoom.isPlayerRoom && !nextRoom.hasVisitors()) {
                     this.moveInto(nextRoom);
                     this.onAttack.notify(this); // tell the game state manager we want to attack, it has the logic to run an attack
-                    break;  // break or else we could move again while in the player's room, will reactivate sent back to spawn
+                    break;  // break or else we could move again while in the player's room, will reactivate when sent back to spawn by game mgr
                 } else if(!nextRoom.isPlayerRoom) {
                     this.moveInto(nextRoom);
                 }
