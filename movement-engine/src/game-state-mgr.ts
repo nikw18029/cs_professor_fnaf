@@ -1,7 +1,8 @@
 import { Room } from "./room.js"
 import { Character } from "./character.js"
 import { Logger } from "./logger.js"
-import {bindUI} from "./ui-bridge.js"
+import { bindUI } from "./ui-bridge.js"
+import { Observable } from "./observable.js"
 
 import config from "./../appcfg.json" with {type: "json"}
 
@@ -12,6 +13,8 @@ export class GameStateMgr {
     rooms: Set<Room>;
     characters: Set<Character>;
     playerRoom: Room;
+    onTimerUpdate: Observable<number>;
+    timerID!: number;
 
     constructor() {
         // build map
@@ -30,7 +33,8 @@ export class GameStateMgr {
         this.rooms = new Set([start, a1, a2, b1, b2, this.playerRoom]);
 
         // bind to html
-        bindUI(this.rooms);
+        this.onTimerUpdate = new Observable<number>();
+        bindUI(this.rooms, this.onTimerUpdate);
 
         // characters and attack observers
         let zandro = new Character("Zandro", start, [a1, a2, this.playerRoom]);
@@ -46,16 +50,34 @@ export class GameStateMgr {
     }
 
     /**
-     * Starts up each character, sets a time to end the game.
+     * Starts up each character, runs a timer.
      */
     public async runGame() {
         const gameDurationMins = (config.gameMins as number) * 60000;
-        setTimeout(() => this.stopGame(), gameDurationMins);
+        const hourInterval = gameDurationMins / 6;
+        
         this.characters.forEach(c => c.activate());
+
+        const runHour = (hour: number, interval: number) => {
+            if (hour > 6) return;
+
+            this.timerID = setTimeout(() => {
+                console.log("current hour=" + hour);
+                this.onTimerUpdate.notify(hour);
+
+                if (hour === 6) {
+                    this.stopGame();
+                } else {
+                    runHour(hour + 1, interval);
+                }
+            }, interval);
+        };
+
+        runHour(1, hourInterval);
     }
 
     /**
-     * Stops the game loop.
+     * Requests to stop game loops.
      */
     public stopGame() {
         this.characters.forEach(c => c.stop());

@@ -4,6 +4,7 @@ import { Observable } from "./observable.js";
  * A character that can move and trigger an attack
  */
 export declare class Character {
+    /**Must be verbaitum what is in appcfg*/
     readonly name: string;
     readonly AI_LVL: number;
     private preferredRooms;
@@ -15,7 +16,7 @@ export declare class Character {
     private pickNextRoom;
     private moveInto;
     /**
-     * Flags the character to stop moving, will stop next time it attempts to move.
+     * Flags the character to stop moving, will stop all loops next time it attempts to move.
      */
     stop(): void;
     /**

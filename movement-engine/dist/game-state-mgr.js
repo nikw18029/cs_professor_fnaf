@@ -2,6 +2,7 @@ import { Room } from "./room.js";
 import { Character } from "./character.js";
 import { Logger } from "./logger.js";
 import { bindUI } from "./ui-bridge.js";
+import { Observable } from "./observable.js";
 import config from "./../appcfg.json" with { type: "json" };
 /**
  * The orchestrator for the game
@@ -10,6 +11,8 @@ export class GameStateMgr {
     rooms;
     characters;
     playerRoom;
+    onTimerUpdate;
+    timerID;
     constructor() {
         // build map
         let start = new Room("start");
@@ -24,7 +27,8 @@ export class GameStateMgr {
         b2.connectNeighbors([b1, a1, a2, this.playerRoom]);
         this.rooms = new Set([start, a1, a2, b1, b2, this.playerRoom]);
         // bind to html
-        bindUI(this.rooms);
+        this.onTimerUpdate = new Observable();
+        bindUI(this.rooms, this.onTimerUpdate);
         // characters and attack observers
         let zandro = new Character("Zandro", start, [a1, a2, this.playerRoom]);
         let mohl = new Character("Mohl", start, [b1, b2, this.playerRoom]);
@@ -37,15 +41,30 @@ export class GameStateMgr {
         }
     }
     /**
-     * Starts up each character, sets a time to end the game.
+     * Starts up each character, runs a timer.
      */
     async runGame() {
         const gameDurationMins = config.gameMins * 60000;
-        setTimeout(() => this.stopGame(), gameDurationMins);
+        const hourInterval = gameDurationMins / 6;
         this.characters.forEach(c => c.activate());
+        const runHour = (hour, interval) => {
+            if (hour > 6)
+                return;
+            this.timerID = setTimeout(() => {
+                console.log("current hour=" + hour);
+                this.onTimerUpdate.notify(hour);
+                if (hour === 6) {
+                    this.stopGame();
+                }
+                else {
+                    runHour(hour + 1, interval);
+                }
+            }, interval);
+        };
+        runHour(1, hourInterval);
     }
     /**
-     * Stops the game loop.
+     * Requests to stop game loops.
      */
     stopGame() {
         this.characters.forEach(c => c.stop());

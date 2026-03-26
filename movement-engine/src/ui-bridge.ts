@@ -1,8 +1,16 @@
+import { Observable } from "./observable.js";
 import {Room} from "./room.js"
 
 // bind the html elements to their object counterparts. subscribe them to room updates
 
-export function bindUI(rooms: Set<Room>) {
+export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>) {
+    // timer
+    const timerEl = document.getElementById("timer");
+    if(timerEl) {
+        timerUpdator.subscribe((hour) => {updateTimer(hour, timerEl);});
+    }
+
+    // rooms
     rooms.forEach(room => {
         const element = document.getElementById(room.htmlID);
         if (!element) return;
@@ -19,6 +27,13 @@ export function bindUI(rooms: Set<Room>) {
             setTimeout(() => element.classList.remove('flash'), 200);
         });
     });
+}
+
+function updateTimer(hour: number, el: HTMLElement){
+    if(hour === 0){
+        hour = 12;
+    }
+    el.innerText = `${hour}:00`;
 }
 
 function updateRoomDisplay(room: Room, el: HTMLElement) {
