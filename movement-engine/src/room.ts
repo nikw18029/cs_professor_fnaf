@@ -2,23 +2,36 @@ import { Character } from "./character.js"
 
 export class Room {
     public readonly htmlID: string;
-    public readonly neighbors: Room[];
-    private visitors: Character[];
+    public neighbors: Set<Room>;
+    private visitors: Set<Character>;
     public readonly isPlayerRoom;
-    
+
     private visitorsChangedFlag!: Promise<void>;   // awaitable flag, use to detect changes to visitors
     private resolveFlag!: () => void;   // resolves the flag's promise
 
-    constructor(htmlID: string, neighbors: Room[], isPlayerRoom: boolean = false) {
+    constructor(htmlID: string, isPlayerRoom: boolean = false, neighbors: Room[] = []) {
         this.htmlID = htmlID;
-        this.neighbors = neighbors;
-        this.visitors = [];
-        this.setFlag();
+        this.neighbors = new Set(neighbors);
+        this.visitors = new Set();
+        this.resetFlag();
         this.isPlayerRoom = isPlayerRoom;
     }
 
-    private setFlag() {
-        this.visitorsChangedFlag =  new Promise<void>(res => (this.resolveFlag = res));
+    private resetFlag() {
+        this.visitorsChangedFlag = new Promise<void>(res => (this.resolveFlag = res));
+    }
+
+    /**
+     * Adds a bi-directional connection between this room and each room in the list.
+     * This method only need to be called once per connection. Ex: a.connectNeighbors([b]) will accomplish the same thing as
+     * b.connectNeighbors([a])
+     * @param neighbors the rooms which will share connections with this room.
+     */
+    public connectNeighbors(neighbors: Room[]) {
+        for (const n of neighbors) {
+            this.neighbors.add(n);
+            n.neighbors.add(this);
+        }
     }
 
     /**
@@ -34,9 +47,9 @@ export class Room {
      * @param entering the character entering this room
      */
     public visitorEnter(entering: Character) {
-        this.visitors.push(entering);
+        this.visitors.add(entering);
         this.resolveFlag(); // complete any awaits
-        this.setFlag(); // reset
+        this.resetFlag(); // reset
     }
 
     /**
@@ -44,13 +57,20 @@ export class Room {
      * @param exiting the character exiting this room (use this)
      */
     public visitorExit(exiting: Character) {
-        let idx = this.visitors.indexOf(exiting);
-        delete this.visitors[idx];
+        this.visitors.delete(exiting);
         this.resolveFlag();
-        this.setFlag();
+        this.resetFlag();
     }
 
-    public extractState(){
+    /**
+     * 
+     * @returns true if the room has visitors already.
+     */
+    public hasVisitors() {
+        return this.visitors.size > 0;
+    }
+
+    public extractState() {
         throw Error("Room.extractState is not implemented.");
     }
 }
