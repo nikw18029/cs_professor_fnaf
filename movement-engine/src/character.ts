@@ -25,7 +25,7 @@ export class Character {
         this.currentRoom.visitorEnter(this);
         
         this.onAttack = new Observable<Character>();
-        this.active = false;
+        this.active = true;
     }
 
     private pickNextRoom(): Room {
@@ -64,12 +64,11 @@ export class Character {
      * Request the character to stop by calling .stop()
      */
     public async activate() {
-        this.active = true;
+        if(!this.active) return;
         let waitSecs = config.moveDelay * 1000;
 
         Logger.debug(`${this.name} activated. Move interval: ${waitSecs}`);
 
-        let result: { src: string };
         while(this.active){
             await new Promise(res => setTimeout(res, waitSecs));
             if(!this.active) break;
@@ -78,14 +77,11 @@ export class Character {
             if (roll <= this.AI_LVL) {
                 let nextRoom = this.pickNextRoom();
                 
-                if (nextRoom.isPlayerRoom) {
+                if (nextRoom.isPlayerRoom && !nextRoom.hasVisitors()) {
                     this.moveInto(nextRoom);
                     this.onAttack.notify(this); // tell the game state manager we want to attack, it has the logic to run an attack
-
-                    // do we need to hault movement here?
-                    Logger.trace(`${this.name} successfully reached the player`);
-                    break;
-                } else {
+                    break;  // break or else we could move again while in the player's room, will reactivate sent back to spawn
+                } else if(!nextRoom.isPlayerRoom) {
                     this.moveInto(nextRoom);
                 }
             }

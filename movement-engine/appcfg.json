@@ -1,6 +1,8 @@
 {
-  "gameMins": 5,
-  "Dummy": 20,
+  "gameMins": 1,
+  "Zandro": 7,
+  "Mohl": 5,
+  "Nilitski": 5,
   "moveDelay": 5,
   "logger": "debug"
 }
