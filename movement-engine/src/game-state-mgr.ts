@@ -15,6 +15,7 @@ export class GameStateMgr {
     playerRoom: Room;
     onTimerUpdate: Observable<number>;
     timerID!: number;
+    isPlayerHidden: boolean = false;
 
     constructor() {
         // build map
@@ -62,7 +63,6 @@ export class GameStateMgr {
             if (hour > 6) return;
 
             this.timerID = setTimeout(() => {
-                console.log("current hour=" + hour);
                 this.onTimerUpdate.notify(hour);
 
                 if (hour === 6) {
@@ -80,6 +80,7 @@ export class GameStateMgr {
      * Requests to stop game loops.
      */
     public stopGame() {
+        clearTimeout(this.timerID);
         this.characters.forEach(c => c.stop());
         Logger.info("Game stopped");
     }
