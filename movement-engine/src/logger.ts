@@ -1,6 +1,6 @@
 /** Logs to the browser console */
 export class Logger {
-    private static minLvl: "crit" | "warn" | "info" | "debug" | "trace" = "trace";
+    private static minLvl: "crit" | "warn" | "info" | "debug" | "trace" = "info";
 
     public static setMinlevel(minLevel: "crit" | "warn" | "info" | "debug" | "trace") {
         Logger.minLvl = minLevel;
