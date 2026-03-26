@@ -10,8 +10,8 @@ export class Character {
     private spawnRoom: Room;
     private currentRoom: Room;
 
-    private attackFlag!: Promise<void>;   // awaitable flag, use outside to detect when a character is attacking
-    private resolveFlag!: () => void;   // resolves the flag's promise, triggers attack
+    private attackFlag!: Promise<Character>;   // awaitable flag, use outside to detect when a character is attacking
+    private resolveFlag!: (character: Character) => void;   // resolves the flag's promise, triggers attack. Pass in this for tagging
 
     constructor(name: string, spawnRoom: Room, preferredRooms: Room[]) {
         this.name = name;
@@ -23,7 +23,7 @@ export class Character {
     }
 
     private resetFlag() {
-        this.attackFlag = new Promise<void>(res => (this.resolveFlag = res));
+        this.attackFlag = new Promise<Character>(res => (this.resolveFlag = res));
     }
 
     private pickNextRoom(): Room {
@@ -39,7 +39,7 @@ export class Character {
             : Array.from(this.currentRoom.neighbors);
 
         if (pool.length === 0) {
-            throw new Error(`Character ${this.name} failed to pick a room.`);
+            Logger.critical(`Character ${this.name} failed to pick a room.`);
         }
 
         return pool[Math.floor(Math.random() * pool.length)] as Room;
@@ -80,7 +80,7 @@ export class Character {
                     if (roll <= this.AI_LVL) {  // move
                         if (nextRoom.isPlayerRoom && !this.currentRoom.hasVisitors()) {
                             this.moveInto(nextRoom);
-                            this.resolveFlag(); // trigger attack
+                            this.resolveFlag(this); // trigger attack
 
                             // game state manager will sense the attack and take it from here.
                         } else if (!nextRoom.isPlayerRoom) {    // next room is regular room
@@ -98,5 +98,13 @@ export class Character {
         } while (result.src != "cancelled");
 
         Logger.debug(`${this.name} movement stopped`);
+    }
+
+    /**
+     * Returns the character to their spawn, resets their attack flag so they can continue to move and attack.
+     */
+    public returnToSpawnAndResetFlag() {
+        this.moveInto(this.spawnRoom);
+        this.resetFlag();
     }
 }
