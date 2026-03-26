@@ -1,29 +1,31 @@
 import { Room } from "./room.js"
 import { Logger } from "./logger.js"
-
 import config from "./../appcfg.json" with {type: "json"}
+import { Observable } from "./observable.js";
 
+/**
+ * A character that can move and trigger an attack
+ */
 export class Character {
     public readonly name: string;
     public readonly AI_LVL: number;
     private preferredRooms: Set<Room>;
     private spawnRoom: Room;
     private currentRoom: Room;
-
-    private attackFlag!: Promise<Character>;   // awaitable flag, use outside to detect when a character is attacking
-    private resolveFlag!: (character: Character) => void;   // resolves the flag's promise, triggers attack. Pass in this for tagging
+    private active: boolean;
+    public onAttack: Observable<Character>;
 
     constructor(name: string, spawnRoom: Room, preferredRooms: Room[]) {
         this.name = name;
         this.preferredRooms = new Set(preferredRooms);
         this.AI_LVL = config[this.name as keyof typeof config] as number;    // ****
         this.spawnRoom = spawnRoom;
-        this.currentRoom = spawnRoom;
-        this.resetFlag();
-    }
 
-    private resetFlag() {
-        this.attackFlag = new Promise<Character>(res => (this.resolveFlag = res));
+        this.currentRoom = spawnRoom;
+        this.currentRoom.visitorEnter(this);
+        
+        this.onAttack = new Observable<Character>();
+        this.active = false;
     }
 
     private pickNextRoom(): Room {
@@ -53,58 +55,50 @@ export class Character {
     }
 
     /**
-     * This functions's promise completes when the character is ready to attack the player.
-     * @returns the attack flag promise
+     * Flags the character to stop moving, will stop next time it attempts to move.
      */
-    public getAttackFlag() {
-        return this.attackFlag;
-    }
+    public stop() { this.active = false }
 
     /**
      * Activates the character in the game. Like pressing a big "GO" button. Starts the wait -> roll -> move loop.
-     * @param cancellationToken flag which terminates the character's loop on completion. Resolve to stop the movement loop.
+     * Request the character to stop by calling .stop()
      */
-    public async activate(cancellationToken: Promise<void>) {
+    public async activate() {
+        this.active = true;
         let waitSecs = config.moveDelay * 1000;
 
         Logger.debug(`${this.name} activated. Move interval: ${waitSecs}`);
 
         let result: { src: string };
-        do {
-            let rollDelay = new Promise<void>((resolve) => {
-                setTimeout(() => {
-                    //                                    (max - min + 1) + min
-                    let roll = Math.floor(Math.random() * (20 - 1 + 1) + 1);    // roll to move
-                    let nextRoom = this.pickNextRoom();
+        while(this.active){
+            await new Promise(res => setTimeout(res, waitSecs));
+            if(!this.active) break;
 
-                    if (roll <= this.AI_LVL) {  // move
-                        if (nextRoom.isPlayerRoom && !this.currentRoom.hasVisitors()) {
-                            this.moveInto(nextRoom);
-                            this.resolveFlag(this); // trigger attack
+            let roll = Math.floor(Math.random() * 20) + 1;
+            if (roll <= this.AI_LVL) {
+                let nextRoom = this.pickNextRoom();
+                
+                if (nextRoom.isPlayerRoom) {
+                    this.moveInto(nextRoom);
+                    this.onAttack.notify(this); // tell the game state manager we want to attack, it has the logic to run an attack
 
-                            // game state manager will sense the attack and take it from here.
-                        } else if (!nextRoom.isPlayerRoom) {    // next room is regular room
-                            this.moveInto(nextRoom);
-                        }
-                    }
-                    resolve();
-                }, waitSecs);
-            });
+                    // do we need to hault movement here?
+                    Logger.trace(`${this.name} successfully reached the player`);
+                    break;
+                } else {
+                    this.moveInto(nextRoom);
+                }
+            }
+        }
 
-            result = await Promise.race([
-                cancellationToken.then(() => ({ src: "cancelled" })),
-                rollDelay.then(() => ({ src: "roll" }))
-            ]);
-        } while (result.src != "cancelled");
-
-        Logger.debug(`${this.name} movement stopped`);
+        Logger.trace(`${this.name} movement loop stopped`);
     }
 
     /**
-     * Returns the character to their spawn, resets their attack flag so they can continue to move and attack.
+     * Returns the character to their spawn and reactivates them.
      */
-    public returnToSpawnAndResetFlag() {
+    public returnToSpawn() {
         this.moveInto(this.spawnRoom);
-        this.resetFlag();
+        this.activate();
     }
 }

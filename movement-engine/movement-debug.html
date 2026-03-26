@@ -1,0 +1,27 @@
+<!--temp-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Movement Engine Simulation</title>
+        <link rel="stylesheet" href="movement-debug.css">
+    </head>
+    <body>
+        <script type="module" defer src="./dist/simulation.js"></script>
+
+        <div id="game-container">
+            <div id="status-bar">Time Remaining: <span id="timer">--:--</span></div>
+        
+            <div id="map-grid">
+                <div id="start" class="room-box full-width">Start</div>
+        
+                <div id="a1" class="room-box">A1</div>
+                <div id="b1" class="room-box">B1</div>
+                <div id="a2" class="room-box">A2</div>
+                <div id="b2" class="room-box">B2</div>
+        
+                <div id="end" class="room-box full-width player-room">Office</div>
+            </div>
+        </div>
+    </body>
+</html>

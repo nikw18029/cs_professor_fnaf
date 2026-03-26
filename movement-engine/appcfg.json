@@ -1,6 +1,6 @@
 {
   "gameMins": 5,
-  "Dummy": 5,
+  "Dummy": 20,
   "moveDelay": 5,
-  "logger": "trace"
+  "logger": "debug"
 }

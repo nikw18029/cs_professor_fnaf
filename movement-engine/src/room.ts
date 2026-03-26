@@ -1,24 +1,28 @@
 import { Character } from "./character.js"
+import { Observable } from "./observable.js"
 
+/**
+ * A room in the map.
+ */
 export class Room {
     public readonly htmlID: string;
     public neighbors: Set<Room>;
     private visitors: Set<Character>;
     public readonly isPlayerRoom;
 
-    private visitorsChangedFlag!: Promise<Room>;   // awaitable flag, use to detect changes to visitors
-    private resolveFlag!: (room: Room) => void;   // resolves the flag's promise. Pass in this for tagging
+    public onUpdate = new Observable<Room>();
 
+    /**
+     * 
+     * @param htmlID must be verbaitum HTML id. Case sensitive.
+     * @param isPlayerRoom is this the room the player will be in?
+     * @param neighbors neighbors of this room. Can set later with connectNeighbors().
+     */
     constructor(htmlID: string, isPlayerRoom: boolean = false, neighbors: Room[] = []) {
         this.htmlID = htmlID;
         this.neighbors = new Set(neighbors);
         this.visitors = new Set();
-        this.resetFlag();
         this.isPlayerRoom = isPlayerRoom;
-    }
-
-    private resetFlag() {
-        this.visitorsChangedFlag = new Promise<Room>(res => (this.resolveFlag = res));
     }
 
     /**
@@ -35,21 +39,12 @@ export class Room {
     }
 
     /**
-     * Use to await for updates to the room's state, to know when to redraw.
-     * @returns a promise fufilled when any character has entered or exited this room.
-     */
-    public detectMove() {
-        return this.visitorsChangedFlag;
-    }
-
-    /**
      * Adds a visitor into the room
      * @param entering the character entering this room
      */
     public visitorEnter(entering: Character) {
         this.visitors.add(entering);
-        this.resolveFlag(this); // complete any awaits
-        this.resetFlag(); // reset
+        this.onUpdate.notify(this);
     }
 
     /**
@@ -58,8 +53,7 @@ export class Room {
      */
     public visitorExit(exiting: Character) {
         this.visitors.delete(exiting);
-        this.resolveFlag(this);
-        this.resetFlag();
+        this.onUpdate.notify(this);
     }
 
     /**
@@ -69,6 +63,8 @@ export class Room {
     public hasVisitors() {
         return this.visitors.size > 0;
     }
+
+    public get visitorCount() { return this.visitors.size; }
 
     public extractState() {
         throw Error("Room.extractState is not implemented.");

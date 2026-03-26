@@ -1,1 +1,1 @@
-{"version":3,"file":"game-state-mgr.d.ts","sourceRoot":"","sources":["../src/game-state-mgr.ts"],"names":[],"mappings":""}
+{"version":3,"file":"game-state-mgr.d.ts","sourceRoot":"","sources":["../src/game-state-mgr.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,IAAI,EAAE,MAAM,WAAW,CAAA;AAChC,OAAO,EAAE,SAAS,EAAE,MAAM,gBAAgB,CAAA;AAM1C;;GAEG;AACH,qBAAa,YAAY;IACrB,KAAK,EAAE,GAAG,CAAC,IAAI,CAAC,CAAC;IACjB,UAAU,EAAE,GAAG,CAAC,SAAS,CAAC,CAAC;IAC3B,UAAU,EAAE,IAAI,CAAC;;IA6BjB;;OAEG;IACU,OAAO;IAMpB;;OAEG;IACI,QAAQ;IAKf,OAAO,CAAC,YAAY;CAOvB"}

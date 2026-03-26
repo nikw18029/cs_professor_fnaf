@@ -1,47 +1,63 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Room = void 0;
-class Room {
+import { Observable } from "./observable.js";
+/**
+ * A room in the map.
+ */
+export class Room {
     htmlID;
+    neighbors;
     visitors;
     isPlayerRoom;
-    visitorsChangedFlag; // awaitable flag, use to detect changes to visitors
-    resolveFlag; // resolves the flag's promise
-    constructor(htmlID, isPlayerRoom = false) {
+    onUpdate = new Observable();
+    /**
+     *
+     * @param htmlID must be verbaitum HTML id. Case sensitive.
+     * @param isPlayerRoom is this the room the player will be in?
+     * @param neighbors neighbors of this room. Can set later with connectNeighbors().
+     */
+    constructor(htmlID, isPlayerRoom = false, neighbors = []) {
         this.htmlID = htmlID;
-        this.visitors = [];
-        this.setFlag();
+        this.neighbors = new Set(neighbors);
+        this.visitors = new Set();
         this.isPlayerRoom = isPlayerRoom;
     }
-    setFlag() {
-        this.visitorsChangedFlag = new Promise(res => (this.resolveFlag = res));
-    }
     /**
-     * Use to await for updates to the room's state, to know when to redraw.
-     * @returns a promise fufilled when any character has entered or exited this room.
+     * Adds a bi-directional connection between this room and each room in the list.
+     * This method only need to be called once per connection. Ex: a.connectNeighbors([b]) will accomplish the same thing as
+     * b.connectNeighbors([a])
+     * @param neighbors the rooms which will share connections with this room.
      */
-    detectMove() {
-        return this.visitorsChangedFlag;
+    connectNeighbors(neighbors) {
+        for (const n of neighbors) {
+            this.neighbors.add(n);
+            n.neighbors.add(this);
+        }
     }
     /**
      * Adds a visitor into the room
      * @param entering the character entering this room
      */
     visitorEnter(entering) {
-        this.visitors.push(entering);
-        this.resolveFlag(); // complete any awaits
-        this.setFlag(); // reset
+        this.visitors.add(entering);
+        this.onUpdate.notify(this);
     }
     /**
      * Removes a visitor from the room
      * @param exiting the character exiting this room (use this)
      */
     visitorExit(exiting) {
-        let idx = this.visitors.indexOf(exiting);
-        delete this.visitors[idx];
-        this.resolveFlag();
-        this.setFlag();
+        this.visitors.delete(exiting);
+        this.onUpdate.notify(this);
+    }
+    /**
+     *
+     * @returns true if the room has visitors already.
+     */
+    hasVisitors() {
+        return this.visitors.size > 0;
+    }
+    get visitorCount() { return this.visitors.size; }
+    extractState() {
+        throw Error("Room.extractState is not implemented.");
     }
 }
-exports.Room = Room;
 //# sourceMappingURL=room.js.map

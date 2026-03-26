@@ -1,21 +1,20 @@
 import { Room } from "./room.js"
 import { Character } from "./character.js"
 import { Logger } from "./logger.js"
+import {bindUI} from "./ui-bridge.js"
 
 import config from "./../appcfg.json" with {type: "json"}
 
-class GameStateMgr {
+/**
+ * The orchestrator for the game
+ */
+export class GameStateMgr {
     rooms: Set<Room>;
     characters: Set<Character>;
-    attackFlags: Promise<Character>[];
     playerRoom: Room;
-    stopTok!: Promise<void>;    // Signals to subprocesses when the game is over and they need to stop
-    resolveTok!: () => void;    // resolves stopTok
 
     constructor() {
-        this.resetTok();
-
-        // Register rooms
+        // build map
         let start = new Room("start");
         let a1 = new Room("a1");
         let a2 = new Room("a2");
@@ -28,64 +27,41 @@ class GameStateMgr {
         b1.connectNeighbors([start, a1, a2, b2]);
         b2.connectNeighbors([b1, a1, a2, this.playerRoom]);
 
-        this.rooms = new Set([start, a1, a2, b1, b2]);
+        this.rooms = new Set([start, a1, a2, b1, b2, this.playerRoom]);
 
-        // Register characters + flags
-        let dummy = new Character("Dummy", start, [start, a1, a2]);
+        // bind to html
+        bindUI(this.rooms);
 
+        // characters and observer slop
+        let dummy = new Character("Dummy", start, [a1, a2, this.playerRoom]);
         this.characters = new Set([dummy]);
-
-        this.attackFlags = Array.from(this.characters).map(c => c.getAttackFlag());
-    }
-
-    private resetTok() {
-        this.stopTok = new Promise<void>(res => (this.resolveTok = res));
+        dummy.onAttack.subscribe((attacker) => {
+            this.handleAttack(attacker);
+        });
     }
 
     /**
-     * Starts and runs the game loop.
+     * Starts up each character, sets a time to end the game.
      */
     public async runGame() {
         const gameDurationMins = (config.gameMins as number) * 60000;
-        setTimeout(() => {
-            Logger.debug("Time's up! Stopping game...");
-            this.resolveTok();
-        }, gameDurationMins);
-
-        for (const c of this.characters) {
-            c.activate(this.stopTok);
-        }
-
-        while(true){
-            const currentFlags = Array.from(this.characters).map(c => c.getAttackFlag());
-
-            // wait for something to attack or for cancellation token
-            const result = await Promise.race([
-                ...this.attackFlags,
-                this.stopTok
-            ]);
-
-            if (result === undefined) { // stopTok triggered
-                Logger.info("Game loop terminated by stop token.");
-                break;
-
-            } else if (result instanceof Character) {   // attack flag triggered
-                let attackResult = this.doAttack(result);
-                
-                if(attackResult.success) {
-                    Logger.info(`${result.name} attacked and successfully ended the game.`);
-                    this.resolveTok();
-                } else {
-                    result.returnToSpawnAndResetFlag();
-                }
-            }
-        }
-        
+        setTimeout(this.stopGame, gameDurationMins);
+        this.characters.forEach(c => c.activate());
     }
 
-    private doAttack(c: Character) {
-        // do attack action then return attacker to spawn
-        Logger.info(`${c.name} attacked!`);
-        return {success: false}   // denote whether the player died or not
+    /**
+     * Stops the game loop.
+     */
+    public stopGame() {
+        this.characters.forEach(c => c.stop());
+        Logger.info("Game stopped");
+    }
+
+    private handleAttack(c: Character) {
+        Logger.info(`${c.name} is attacking!`);
+        // if player fails to defend:
+        // this.stopGame();
+        // temp: simulate attack with timeout
+        setTimeout(() => c.returnToSpawn(), 10000);
     }
 }
