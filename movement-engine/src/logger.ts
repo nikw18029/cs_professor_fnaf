@@ -48,7 +48,7 @@ export class Logger {
             Logger.minLvl === "debug" ||
             Logger.minLvl === "trace"
         ) {
-            console.log(`[${Date.now()}][DBG]: ${msg}`);
+            console.log(`[${Date.now()}][DEBUG]: ${msg}`);
         }
     }
 

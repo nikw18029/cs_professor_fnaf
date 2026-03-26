@@ -6,8 +6,8 @@ export class Room {
     private visitors: Set<Character>;
     public readonly isPlayerRoom;
 
-    private visitorsChangedFlag!: Promise<void>;   // awaitable flag, use to detect changes to visitors
-    private resolveFlag!: () => void;   // resolves the flag's promise
+    private visitorsChangedFlag!: Promise<Room>;   // awaitable flag, use to detect changes to visitors
+    private resolveFlag!: (room: Room) => void;   // resolves the flag's promise. Pass in this for tagging
 
     constructor(htmlID: string, isPlayerRoom: boolean = false, neighbors: Room[] = []) {
         this.htmlID = htmlID;
@@ -18,7 +18,7 @@ export class Room {
     }
 
     private resetFlag() {
-        this.visitorsChangedFlag = new Promise<void>(res => (this.resolveFlag = res));
+        this.visitorsChangedFlag = new Promise<Room>(res => (this.resolveFlag = res));
     }
 
     /**
@@ -48,7 +48,7 @@ export class Room {
      */
     public visitorEnter(entering: Character) {
         this.visitors.add(entering);
-        this.resolveFlag(); // complete any awaits
+        this.resolveFlag(this); // complete any awaits
         this.resetFlag(); // reset
     }
 
@@ -58,7 +58,7 @@ export class Room {
      */
     public visitorExit(exiting: Character) {
         this.visitors.delete(exiting);
-        this.resolveFlag();
+        this.resolveFlag(this);
         this.resetFlag();
     }
 
