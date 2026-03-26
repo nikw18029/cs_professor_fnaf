@@ -32,12 +32,17 @@ export class GameStateMgr {
         // bind to html
         bindUI(this.rooms);
 
-        // characters and observer slop
-        let dummy = new Character("Dummy", start, [a1, a2, this.playerRoom]);
-        this.characters = new Set([dummy]);
-        dummy.onAttack.subscribe((attacker) => {
-            this.handleAttack(attacker);
-        });
+        // characters and attack observers
+        let zandro = new Character("Zandro", start, [a1, a2, this.playerRoom]);
+        let mohl = new Character("Mohl", start, [b1, b2, this.playerRoom]);
+        let nilitski = new Character("Nilitski", start, [a1, b2, this.playerRoom]);
+        this.characters = new Set([zandro, mohl, nilitski]);
+
+        for(const c of this.characters){
+            c.onAttack.subscribe((attacker) => {
+                this.handleAttack(attacker);
+            });
+        }
     }
 
     /**
@@ -45,7 +50,7 @@ export class GameStateMgr {
      */
     public async runGame() {
         const gameDurationMins = (config.gameMins as number) * 60000;
-        setTimeout(this.stopGame, gameDurationMins);
+        setTimeout(() => this.stopGame(), gameDurationMins);
         this.characters.forEach(c => c.activate());
     }
 

@@ -25,19 +25,23 @@ export class GameStateMgr {
         this.rooms = new Set([start, a1, a2, b1, b2, this.playerRoom]);
         // bind to html
         bindUI(this.rooms);
-        // characters and observer slop
-        let dummy = new Character("Dummy", start, [a1, a2, this.playerRoom]);
-        this.characters = new Set([dummy]);
-        dummy.onAttack.subscribe((attacker) => {
-            this.handleAttack(attacker);
-        });
+        // characters and attack observers
+        let zandro = new Character("Zandro", start, [a1, a2, this.playerRoom]);
+        let mohl = new Character("Mohl", start, [b1, b2, this.playerRoom]);
+        let nilitski = new Character("Nilitski", start, [a1, b2, this.playerRoom]);
+        this.characters = new Set([zandro, mohl, nilitski]);
+        for (const c of this.characters) {
+            c.onAttack.subscribe((attacker) => {
+                this.handleAttack(attacker);
+            });
+        }
     }
     /**
      * Starts up each character, sets a time to end the game.
      */
     async runGame() {
         const gameDurationMins = config.gameMins * 60000;
-        setTimeout(this.stopGame, gameDurationMins);
+        setTimeout(() => this.stopGame(), gameDurationMins);
         this.characters.forEach(c => c.activate());
     }
     /**
