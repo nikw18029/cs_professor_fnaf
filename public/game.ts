@@ -85,21 +85,22 @@ class Professor {
 	}
 
 	getScaledSize(): Vector2 {
-		return { x: this.sprite.naturalWidth * this.scale.x * windowScale, y: this.sprite.naturalHeight * this.scale.y * windowScale };
+		const size : Vector2 = this.getSpriteSize();
+		return { x: size.x * this.scale.x * windowScale, y: size.y * this.scale.y * windowScale };
 	}
 
 	// Sets the professor's current sprite.
 	setSprite(newSrc: string): void {
 		this.sprite.src = `img/${newSrc}.png`;
-		this.centerSprite();
 	}
 
-	// Centers the sprite, taking the local scale into account.
-	centerSprite(): void {
-		const scaledSize: Vector2 = this.getScaledSize();
-		// Keep sprite centered on parent
-		this.sprite.style.left = `-${scaledSize.x * 0.5}px`;
-		this.sprite.style.top = `-${scaledSize.y * 0.5}px`;
+	getSpriteSize(): Vector2 {
+		const size : Vector2 = this.defaultSpriteSize;
+		if (this.sprite.naturalWidth != 0)
+			size.x = this.sprite.naturalWidth;
+		if (this.sprite.naturalHeight != 0)
+			size.y = this.sprite.naturalHeight;
+		return size;
 	}
 
 	// Called from redrawRoom()
@@ -236,3 +237,5 @@ document.addEventListener('keydown', (e : KeyboardEvent) => {
 window.addEventListener('resize', (_e) => {
 	onWindowScaled();
 });
+
+onWindowScaled();
