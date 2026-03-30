@@ -1,7 +1,7 @@
 // Represents a single room
 var Room = /** @class */ (function () {
     function Room(name, backgroundImage) {
-        // Determines the background image's zoom level
+        // Determines the background image's zoom level, relative to the screen width
         this.zoom = 1.0;
         // Positions of the professors
         this.sandroPosition = { x: 0, y: 0 };
@@ -29,19 +29,21 @@ var Room = /** @class */ (function () {
         this.zoom = zoom;
         return this;
     };
-    // Returns the size of the room's background image, taking scales and zooms into account.
-    Room.prototype.getSize = function () {
-        return { x: roomImg.naturalWidth * windowScale * this.zoom, y: roomImg.naturalHeight * windowScale * this.zoom };
+    // Returns the width of the room's background image (in percentages), taking zooms into account.
+    Room.prototype.getBackgroundWidth = function () {
+        return 100 * this.zoom;
     };
     return Room;
 }());
 // Represents a professor
 var Professor = /** @class */ (function () {
     function Professor(name, root, sprite) {
+        this.scale = { x: 1.0, y: 1.0 }; // Sprite's scale
+        this.defaultSpriteSize = { x: 128, y: 128 };
         this.name = name;
         this.root = root;
         this.sprite = sprite;
-        this.scale = { x: 1.0, y: 1.0 };
+        this.setScale({ x: 1.0, y: 1.0 });
     }
     Professor.prototype.isVisible = function () {
         return this.room == currentRoom;
@@ -94,14 +96,24 @@ var Professor = /** @class */ (function () {
     };
     return Professor;
 }());
+// Game screen setup
+var room = document.querySelector('#room');
+var roomImg = document.querySelector('#room-img');
+// Reference size of the window. Everything resizes based on this resolution.
+var BASE_WINDOW_SIZE = { x: 800, y: 600 };
+// Current window scale based on the reference resolution. Updated whenever the window resizes.
+var windowScale = calculateWindowScale();
+// Returns the scale ratio of the current window
+function calculateWindowScale() {
+    var rect = room.getBoundingClientRect();
+    return rect.width / BASE_WINDOW_SIZE.x;
+}
 // Keys for professors
 var SANDRO_KEY = 'sandro';
 var BILTISKI_KEY = 'bilitski';
 var OHL_KEY = 'ohl';
 var DEEPAK_KEY = 'deepak';
 // Global references to game elements
-var room = document.querySelector('#room');
-var roomImg = document.querySelector('#room-img');
 var sandro = createProfessor(SANDRO_KEY);
 var bilitski = createProfessor(BILTISKI_KEY);
 var ohl = createProfessor(OHL_KEY);
@@ -111,23 +123,19 @@ var room1 = new Room('stage', 'stage')
     .setProfessorPosition(SANDRO_KEY, { x: 100, y: 50 })
     .setProfessorPosition(BILTISKI_KEY, { x: 10, y: 200 })
     .setProfessorPosition(OHL_KEY, { x: 200, y: 100 })
-    .setProfessorPosition(DEEPAK_KEY, { x: 500, y: 50 })
-    .setZoom(0.2);
+    .setProfessorPosition(DEEPAK_KEY, { x: 500, y: 50 });
 var room2 = new Room('help_desk', 'door closed')
     .setProfessorPosition(SANDRO_KEY, { x: 100, y: 0 })
     .setProfessorPosition(BILTISKI_KEY, { x: 10, y: 0 })
     .setProfessorPosition(OHL_KEY, { x: 200, y: 0 })
-    .setProfessorPosition(DEEPAK_KEY, { x: 500, y: 0 })
-    .setZoom(0.2);
+    .setProfessorPosition(DEEPAK_KEY, { x: 500, y: 0 });
 // The current room the player is in
 var currentRoom = room1;
 // Redraws the current room
 function redrawRoom() {
     // Update room
     roomImg.src = "img/background/".concat(currentRoom.backgroundImage, ".jpg");
-    var scaledSize = currentRoom.getSize();
-    roomImg.style.width = "".concat(scaledSize.x, "px");
-    roomImg.style.height = "".concat(scaledSize.y, "px");
+    roomImg.style.width = "".concat(currentRoom.getBackgroundWidth(), "%");
     sandro.redraw();
     bilitski.redraw();
     ohl.redraw();
@@ -151,7 +159,17 @@ function changeRoom(newRoom) {
     // TODO Hide old sprites, show new sprites
     currentRoom = newRoom;
 }
-// TODO Replace this with proper camera system 
+// Called whenever the window size changes.
+function onWindowScaled() {
+    windowScale = calculateWindowScale(); // Update window scale
+    // Force objects to re-scale
+    sandro.setScale(sandro.scale);
+    bilitski.setScale(bilitski.scale);
+    ohl.setScale(ohl.scale);
+    deepak.setScale(deepak.scale);
+    redrawRoom();
+}
+// TODO Replace this with proper camera system
 document.addEventListener('keydown', function (e) {
     if (currentRoom == room1)
         changeRoom(room2);
@@ -164,22 +182,7 @@ document.addEventListener('keydown', function (e) {
     deepak.setRoom(room1);
     redrawRoom();
 });
-// Reference size of the window. Everything will resize based on this resolution
-var BASE_WINDOW_SIZE = { x: 800, y: 600 };
-// Current window scale based on the reference resolution. Updated whenever the window resizes.
-var windowScale = calculateWindowScale();
-// Returns the scale ratio of the current window
-function calculateWindowScale() {
-    var rect = room.getBoundingClientRect();
-    return rect.width / BASE_WINDOW_SIZE.x;
-}
 // Handle window resizing
 window.addEventListener('resize', function (_e) {
-    windowScale = calculateWindowScale(); // Update window scale
-    // Force objects to re-scale
-    sandro.setScale(sandro.scale);
-    bilitski.setScale(bilitski.scale);
-    ohl.setScale(ohl.scale);
-    deepak.setScale(deepak.scale);
-    redrawRoom();
+    onWindowScaled();
 });
