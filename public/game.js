@@ -58,19 +58,20 @@ var Professor = /** @class */ (function () {
         this.sprite.style.height = "".concat(scaledSize.y, "px");
     };
     Professor.prototype.getScaledSize = function () {
-        return { x: this.sprite.naturalWidth * this.scale.x * windowScale, y: this.sprite.naturalHeight * this.scale.y * windowScale };
+        var size = this.getSpriteSize();
+        return { x: size.x * this.scale.x * windowScale, y: size.y * this.scale.y * windowScale };
     };
     // Sets the professor's current sprite.
     Professor.prototype.setSprite = function (newSrc) {
         this.sprite.src = "img/".concat(newSrc, ".png");
-        this.centerSprite();
     };
-    // Centers the sprite, taking the local scale into account.
-    Professor.prototype.centerSprite = function () {
-        var scaledSize = this.getScaledSize();
-        // Keep sprite centered on parent
-        this.sprite.style.left = "-".concat(scaledSize.x * 0.5, "px");
-        this.sprite.style.top = "-".concat(scaledSize.y * 0.5, "px");
+    Professor.prototype.getSpriteSize = function () {
+        var size = this.defaultSpriteSize;
+        if (this.sprite.naturalWidth != 0)
+            size.x = this.sprite.naturalWidth;
+        if (this.sprite.naturalHeight != 0)
+            size.y = this.sprite.naturalHeight;
+        return size;
     };
     // Called from redrawRoom()
     Professor.prototype.redraw = function () {
@@ -186,3 +187,4 @@ document.addEventListener('keydown', function (e) {
 window.addEventListener('resize', function (_e) {
     onWindowScaled();
 });
+onWindowScaled();
