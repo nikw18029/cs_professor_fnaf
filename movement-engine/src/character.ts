@@ -2,6 +2,7 @@ import { Room } from "./room.js"
 import { Logger } from "./logger.js"
 import config from "./../appcfg.json" with {type: "json"}
 import { Observable } from "./observable.js";
+import { Vector2 } from "./vector2.js";
 
 /**
  * A character that can move and trigger an attack
@@ -15,6 +16,8 @@ export class Character {
     private currentRoom: Room;
     private active: boolean;
     public onAttack: Observable<Character>;
+    public onRoomChange: Observable<Character>;
+	private spriteElement! : HTMLImageElement;
 
     constructor(name: string, spawnRoom: Room, preferredRooms: Room[]) {
         this.name = name;
@@ -26,8 +29,23 @@ export class Character {
         this.currentRoom.visitorEnter(this);
         
         this.onAttack = new Observable<Character>();
+		this.onRoomChange = new Observable<Character>();
         this.active = true;
+		this.initializeSprite();
     }
+	
+	/**
+	 * Creates the sprite element for this character.
+	 */
+	private initializeSprite() {
+		this.spriteElement = document.createElement("img") as HTMLImageElement;
+		console.log(`Character sprite ${this.name}.png loaded.`);
+		// this.spriteElement.src = `${this.name}.png`; // TODO Get from server
+		this.spriteElement.classList.add("character-sprite");
+
+		const parent : HTMLElement = document.querySelector("#game-screen") as HTMLElement;
+		parent.appendChild(this.spriteElement);
+	}
 
     private pickNextRoom(): Room {
         const preferredNeighbors: Room[] = [];
@@ -55,10 +73,29 @@ export class Character {
         return pool[Math.floor(Math.random() * pool.length)] as Room;   // if player room is failed to roll earlier it can still be selected here.
     }
 
+	/**
+	 * Returns the room this character is currently in.
+	 */
+	public getCurrentRoom() : Room {
+		return this.currentRoom;
+	}
+
+	/**
+	 * Redraws the character's sprite at the give position.
+	 * @param isVisible Determines whether the sprite should be visible or not.
+	 * @param position The position to draw the sprite at.
+	 */
+	public redraw(isVisible : boolean, position : Vector2) {
+		this.spriteElement.style.left = `${position.x}px`;
+		this.spriteElement.style.top = `${position.y}px`;
+		this.spriteElement.style.visibility = isVisible ? "visible" : "hidden";
+	}
+
     private moveInto(newRoom: Room) {
         this.currentRoom.visitorExit(this);
         newRoom.visitorEnter(this);
         this.currentRoom = newRoom;
+		this.onRoomChange.notify(this);
         Logger.debug(`${this.name} moved to ${newRoom.htmlID}`);
     }
 

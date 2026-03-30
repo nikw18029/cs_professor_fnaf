@@ -12,3 +12,19 @@ const game = new GameStateMgr();
 game.runGame();
 
 Logger.info("Game is initialized and running.");
+
+
+// Debug system to toggle map
+// TODO Move to a different file
+let isMapVisible : boolean = true;
+const map : HTMLDivElement = document.querySelector('#map-screen') as HTMLDivElement;
+
+document.addEventListener('keydown', (e : KeyboardEvent) => {
+	if (e.key == 'm')
+		toggleMap();
+});
+
+function toggleMap(): void {
+	isMapVisible = !isMapVisible;
+	map.style.visibility = isMapVisible ? 'visible' : 'hidden';
+}
