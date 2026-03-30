@@ -2,6 +2,7 @@ import { Room } from "./room.js"
 import { Character } from "./character.js"
 import { Logger } from "./logger.js"
 import { bindUI } from "./ui-bridge.js"
+import { initializeRoomRenderer } from "./room-renderer.js"
 import { Observable } from "./observable.js"
 
 import config from "./../appcfg.json" with {type: "json"}
@@ -19,12 +20,12 @@ export class GameStateMgr {
 
     constructor() {
         // build map
-        let start = new Room("start");
-        let a1 = new Room("a1");
-        let a2 = new Room("a2");
-        let b1 = new Room("b1");
-        let b2 = new Room("b2");
-        this.playerRoom = new Room("end", true);
+        let start = new Room("start", "back_entrance");
+        let a1 = new Room("a1", "classroom1");
+        let a2 = new Room("a2", "offices");
+        let b1 = new Room("b1", "stage");
+        let b2 = new Room("b2", "staircase");
+        this.playerRoom = new Room("end", "window", true);
 
         a1.connectNeighbors([start, b1, a2, b2]);
         a2.connectNeighbors([a1, b1, b2, this.playerRoom]);
@@ -48,6 +49,8 @@ export class GameStateMgr {
                 this.handleAttack(attacker);
             });
         }
+		
+		initializeRoomRenderer(this.playerRoom, this.characters);
     }
 
     /**

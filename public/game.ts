@@ -14,7 +14,7 @@ class Room {
 	// Determines the background image's zoom level, relative to the screen width
 	zoom: number = 1.0;
 
-	// Positions of the professors
+	// Visual positions of the professors
 	sandroPosition: Vector2 = { x : 0, y : 0 };
 	bilitskiPosition: Vector2 = { x : 0, y : 0 };
 	ohlPosition: Vector2 = { x : 0, y : 0 };
@@ -148,24 +148,18 @@ const BILTISKI_KEY: string = 'bilitski';
 const OHL_KEY: string = 'ohl';
 const DEEPAK_KEY: string = 'deepak';
 
-// Global references to game elements
-const sandro: Professor = createProfessor(SANDRO_KEY);
-const bilitski: Professor = createProfessor(BILTISKI_KEY);
-const ohl: Professor = createProfessor(OHL_KEY);
-const deepak: Professor = createProfessor(DEEPAK_KEY);
-
 // Test rooms
 const room1: Room = new Room('stage', 'stage')
 	.setProfessorPosition(SANDRO_KEY, { x: 100, y: 50 })
 	.setProfessorPosition(BILTISKI_KEY, { x: 10, y: 200 })
 	.setProfessorPosition(OHL_KEY, { x: 200, y: 100 })
-	.setProfessorPosition(DEEPAK_KEY, { x: 500, y: 50 })
-	
-	const room2: Room = new Room('help_desk', 'door closed')
+	.setProfessorPosition(DEEPAK_KEY, { x: 500, y: 50 });
+
+const room2: Room = new Room('help_desk', 'door closed')
 	.setProfessorPosition(SANDRO_KEY, { x: 100, y: 0 })
 	.setProfessorPosition(BILTISKI_KEY, { x: 10, y: 0 })
 	.setProfessorPosition(OHL_KEY, { x: 200, y: 0 })
-	.setProfessorPosition(DEEPAK_KEY, { x: 500, y: 0 })
+	.setProfessorPosition(DEEPAK_KEY, { x: 500, y: 0 });
 
 // The current room the player is in
 let currentRoom: Room = room1;
@@ -239,3 +233,9 @@ window.addEventListener('resize', (_e) => {
 });
 
 onWindowScaled();
+
+// Global references to game elements
+const sandro: Professor = createProfessor(SANDRO_KEY);
+const bilitski: Professor = createProfessor(BILTISKI_KEY);
+const ohl: Professor = createProfessor(OHL_KEY);
+const deepak: Professor = createProfessor(DEEPAK_KEY);
