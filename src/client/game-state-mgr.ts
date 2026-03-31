@@ -5,7 +5,7 @@ import { bindUI } from "./ui-bridge.js"
 import { initializeRoomRenderer } from "./room-renderer.js"
 import { Observable } from "./observable.js"
 
-import config from "./../appcfg.json" with {type: "json"}
+import config from "./config.js"
 
 /**
  * The orchestrator for the game
@@ -39,10 +39,10 @@ export class GameStateMgr {
         bindUI(this.rooms, this.onTimerUpdate);
 
         // characters and attack observers
-        let zandro = new Character("Zandro", start, [a1, a2, this.playerRoom]);
-        let mohl = new Character("Mohl", start, [b1, b2, this.playerRoom]);
-        let nilitski = new Character("Nilitski", start, [a1, b2, this.playerRoom]);
-        this.characters = new Set([zandro, mohl, nilitski]);
+        let sandro = new Character("sandro", start, [a1, a2, this.playerRoom]);
+        let ohl = new Character("ohl", start, [b1, b2, this.playerRoom]);
+        let bilitski = new Character("bilitski", start, [a1, b2, this.playerRoom]);
+        this.characters = new Set([sandro, ohl, bilitski]);
 
         for(const c of this.characters){
             c.onAttack.subscribe((attacker) => {
@@ -50,7 +50,7 @@ export class GameStateMgr {
             });
         }
 		
-		initializeRoomRenderer(this.playerRoom, this.characters);
+		initializeRoomRenderer(start, this.characters);
     }
 
     /**
@@ -65,7 +65,7 @@ export class GameStateMgr {
         const runHour = (hour: number, interval: number) => {
             if (hour > 6) return;
 
-            this.timerID = setTimeout(() => {
+            setTimeout(() => {
                 this.onTimerUpdate.notify(hour);
 
                 if (hour === 6) {

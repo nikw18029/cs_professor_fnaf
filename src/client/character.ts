@@ -1,6 +1,6 @@
 import { Room } from "./room.js"
 import { Logger } from "./logger.js"
-import config from "./../appcfg.json" with {type: "json"}
+import config from "./config.js"
 import { Observable } from "./observable.js";
 import { Vector2 } from "./vector2.js";
 
@@ -40,7 +40,7 @@ export class Character {
 	private initializeSprite() {
 		this.spriteElement = document.createElement("img") as HTMLImageElement;
 		console.log(`Character sprite ${this.name}.png loaded.`);
-		// this.spriteElement.src = `${this.name}.png`; // TODO Get from server
+		this.spriteElement.src = `img/${this.name}.png`;
 		this.spriteElement.classList.add("character-sprite");
 
 		const parent : HTMLElement = document.querySelector("#game-screen") as HTMLElement;

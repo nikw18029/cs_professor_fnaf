@@ -1,3 +1,8 @@
+/// This is the original code Danny made when prototyping the room system.
+/// Don't use or compile it.
+// (Danny will delete this file after all the functionality is ported to the new files)
+
+
 // Represents a point on a 2d plane, or a 2d direction.
 interface Vector2 {
 	x: number,

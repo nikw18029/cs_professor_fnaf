@@ -19,10 +19,8 @@
 	background-color: black;
 }
 
-.professor-rect {
+.character-sprite {
 	position: absolute;
-}
-
-.professor-sprite {
-	position: absolute;
+	left: 100px;
+	top: 100px;
 }

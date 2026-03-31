@@ -38,7 +38,7 @@ const roomImage : HTMLImageElement = document.querySelector('#room-img') as HTML
  */
 function redraw(): void {
 	console.log(`background set to ${currentRoom.backgroundImage}.`);
-	// TODO Get from server roomImage.src = currentRoom.backgroundImage;
+	roomImage.src = currentRoom.backgroundImage;
 	
 	// Redraw the characters
 	characters.forEach(character => {
