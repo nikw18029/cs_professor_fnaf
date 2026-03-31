@@ -1,0 +1,29 @@
+{
+  "name": "cs_professor_fnaf",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/nikw18029/cs_professor_fnaf#readme",
+  "bugs": {
+    "url": "https://github.com/nikw18029/cs_professor_fnaf/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nikw18029/cs_professor_fnaf.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "node": "^25.8.2",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "typescript": "^6.0.2"
+  }
+}
