@@ -1,5 +1,5 @@
 import express from "express";
-import gameRoute from "../dist/routes/game.js";
+import gameRoute from "./routes/game.js";
 
 const PORT = 3000;
 
