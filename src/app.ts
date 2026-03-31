@@ -5,7 +5,7 @@ const PORT = 3000;
 
 const app = express();
 
-app.use(express.static('../public2'));
+app.use(express.static('public2'));
 app.use('/game', gameRoute);        // for this tiny example go to localhost:3000/game
 
 app.listen(PORT, () => {
