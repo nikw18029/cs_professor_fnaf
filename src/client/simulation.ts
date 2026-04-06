@@ -21,12 +21,7 @@ const map: HTMLDivElement = document.querySelector('#map-screen') as HTMLDivElem
 setMapVisibility(false); // Start hidden
 document.addEventListener('keydown', (e: KeyboardEvent) => {
 	if (e.key == 'm')
-		setMapVisibility(true);
-});
-
-document.addEventListener('keyup', (e: KeyboardEvent) => {
-	if (e.key == 'm')
-		setMapVisibility(false);
+		setMapVisibility(!isMapVisible);
 });
 
 function setMapVisibility(isVisible : boolean): void {
