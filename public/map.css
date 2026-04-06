@@ -10,6 +10,7 @@ This file currently styles the room display. Needs to be updated at some point.
 .room-box {
 	position: absolute;
 
+	cursor: pointer;
 	width: 5%;
 	min-width: 50px;
 	aspect-ratio: 1 / 1;

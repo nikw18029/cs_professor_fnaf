@@ -11,26 +11,27 @@
 </head>
 
 <body>
-	<!-- button to move to log in page -->
-	<button type="button" onclick="window.location.href='login.html'"> Log in </button>
+	<div id="interface-elements">
+		<div id="status-bar">Time: <span id="timer">12:00</span></div>
+		<!-- button to move to log in page -->
+		<button type="button" onclick="window.location.href='login.html'"> Log in </button>
+		<!-- showing what user is currently logged in on the game page
+		<p>Logged in as: <span id="current-user">Not logged in</span></p>
+		does not currently work because we need some server storage
+		-->
 
-	<!-- showing what user is currently logged in on the game page
-	<p>Logged in as: <span id="current-user">Not logged in</span></p>
-	does not currently work because we need some server storage
- 	-->
+		<div id="controls">
+			<button id="hide-btn">HIDE UNDER DESK</button>
+		</div>
+	</div>
 
 
 	<div id="game-container">
 		<div id="game-screen">
 		</div>
 
-		<div id="map-screen">
-			<div id="status-bar">Time: <span id="timer">12:00</span></div>
-		
+		<div id="map-screen">		
 			<div id="map-grid">
-				<div id="controls">
-					<button id="hide-btn">HIDE UNDER DESK</button>
-				</div>
 			</div>
 		</div>
 	</div>

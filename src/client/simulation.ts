@@ -18,12 +18,18 @@ Logger.info("Game is initialized and running.");
 let isMapVisible: boolean = true;
 const map: HTMLDivElement = document.querySelector('#map-screen') as HTMLDivElement;
 
+setMapVisibility(false); // Start hidden
 document.addEventListener('keydown', (e: KeyboardEvent) => {
 	if (e.key == 'm')
-		toggleMap();
+		setMapVisibility(true);
 });
 
-function toggleMap(): void {
-	isMapVisible = !isMapVisible;
+document.addEventListener('keyup', (e: KeyboardEvent) => {
+	if (e.key == 'm')
+		setMapVisibility(false);
+});
+
+function setMapVisibility(isVisible : boolean): void {
+	isMapVisible = isVisible;
 	map.style.visibility = isMapVisible ? 'visible' : 'hidden';
 }
