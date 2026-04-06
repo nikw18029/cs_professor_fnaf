@@ -12,15 +12,22 @@
 #map-screen {
 	position: absolute;
 	left: 0px;
+	top: 0px;
 	right: 0px;
+	bottom: 0px;
 }
 
 #game-container {
 	background-color: black;
+	overflow: hidden;
 }
 
 .character-sprite {
 	position: absolute;
 	left: 100px;
 	top: 100px;
+}
+
+#room-img {
+	width: 100%;
 }
