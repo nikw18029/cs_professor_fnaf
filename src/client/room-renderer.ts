@@ -28,7 +28,11 @@ const characters : Set<Character> = new Set([]); // Set of characters to listen 
  * @param room 
  */
 export function setCurrentRoom(room : Room) {
+	if (currentRoom != undefined)
+		currentRoom.htmlElement.classList.remove('current');
+	
 	currentRoom = room;
+	currentRoom.htmlElement.classList.add('current');
 	redraw();
 }
 

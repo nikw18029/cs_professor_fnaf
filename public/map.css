@@ -23,17 +23,30 @@ This file currently styles the room display. Needs to be updated at some point.
     transition: all 0.2s ease-in-out;
 }
 
-/* Debug style when a room has a visitor. Hide this in the final game. */
+/* Debug style when a room has a visitor. Hide this in the final game.
 .room-box.has-visitor {
-    background-color: #441111;
+	background-color: #441111;
     border-color: #ff0000;
     box-shadow: inset 0 0 15px #ff0000;
+}
+*/
+
+/* Style for the current room */
+.room-box.current {
+    background-color: #442b11;
+    border-color: #ffc800;
+    box-shadow: inset 0 0 15px #ffd900;
 }
 
 .player-room {
     border-style: dashed;
     border-color: #3b3b3b;
     border-width: 10px;
+	
+	/* Player room has a non-default color so it stands out. */
+    background-color: #441111;
+    border-color: #ff0000;
+    box-shadow: inset 0 0 15px #ff0000;
 }
 
 #hide-btn {
