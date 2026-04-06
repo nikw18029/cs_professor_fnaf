@@ -24,6 +24,7 @@
 }
 
 .room-img {
+	position: absolute;
 	/* Ensures the background image takes up the entire game screen. */
 	width: 100%;
 }

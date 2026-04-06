@@ -7,9 +7,9 @@ import { setCurrentRoom } from "./room-renderer.js"
  * A room in the map.
  */
 export class Room {
-	public readonly htmlElement : HTMLDivElement;
 	public readonly roomName: string;
-	public readonly backgroundImage: string;
+	public readonly htmlElement : HTMLDivElement;
+	public readonly backgroundElement : HTMLImageElement;
     public neighbors: Set<Room>;
     private characterPositions: Record<string, Vector2>; // Visual positions of the characters in the room
     private visitors: Set<Character>;
@@ -25,7 +25,7 @@ export class Room {
     constructor(roomName: string, backgroundImage : string, isPlayerRoom: boolean = false, neighbors: Room[] = []) {
         this.roomName = roomName;
 		this.htmlElement = this.createHtmlElement();
-		this.backgroundImage = `img/background/${backgroundImage}.jpg`;
+		this.backgroundElement = this.createBackgroundElement(backgroundImage);
         this.neighbors = new Set(neighbors);
         this.visitors = new Set();
 		this.characterPositions = {};
@@ -33,10 +33,10 @@ export class Room {
     }
 
 	/**
-	 * Constructs an HTMLDiv element for this room.
+	 * Constructs a HTMLDiv element for this room.
 	 */
 	private createHtmlElement() : HTMLDivElement {
-		const div = document.createElement("div") as HTMLDivElement;
+		const div = document.createElement('div') as HTMLDivElement;
 		div.classList.add('room-box');
 		div.id = this.roomName.toLowerCase().replace(' ', '-');
 
@@ -50,6 +50,20 @@ export class Room {
 
 		document.getElementById('map-grid')?.appendChild(div);
 		return div;
+	}
+
+	/**
+	 * Constructs a HTML background element for this room.
+	 */
+	private createBackgroundElement(src : String) : HTMLImageElement {
+		const img = document.createElement('img') as HTMLImageElement;
+		img.src = `img/background/${src}.jpg`;
+		img.classList.add('room-img');
+		img.style.visibility = 'hidden'; // Hide by default
+
+		// Add it to the game screen
+		document.querySelector('#game-screen')?.appendChild(img);
+		return img;
 	}
 
     /**

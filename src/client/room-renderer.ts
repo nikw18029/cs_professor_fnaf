@@ -29,21 +29,21 @@ const characters : Set<Character> = new Set([]); // Set of characters to listen 
  */
 export function setCurrentRoom(room : Room) {
 	if (currentRoom != undefined)
+	{
 		currentRoom.htmlElement.classList.remove('current');
+		currentRoom.backgroundElement.style.visibility = 'hidden';
+	}
 	
 	currentRoom = room;
 	currentRoom.htmlElement.classList.add('current');
+	currentRoom.backgroundElement.style.visibility = 'visible';
 	redraw();
 }
 
-const roomImage : HTMLImageElement = document.querySelector('.room-img') as HTMLImageElement;
 /**
  * Redraws the room.
  */
 function redraw(): void {
-	console.log(`background set to ${currentRoom.backgroundImage}.`);
-	roomImage.src = currentRoom.backgroundImage;
-	
 	// Redraw the characters
 	characters.forEach(character => {
 		const isVisible : boolean = character.getCurrentRoom() == currentRoom;
