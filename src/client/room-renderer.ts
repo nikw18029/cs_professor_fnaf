@@ -32,7 +32,7 @@ export function setCurrentRoom(room : Room) {
 	redraw();
 }
 
-const roomImage : HTMLImageElement = document.querySelector('#room-img') as HTMLImageElement;
+const roomImage : HTMLImageElement = document.querySelector('.room-img') as HTMLImageElement;
 /**
  * Redraws the room.
  */

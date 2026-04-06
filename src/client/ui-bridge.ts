@@ -42,7 +42,7 @@ function updateRoomDisplay(room: Room, el: HTMLElement) {
     // Update the inner HTML
     el.innerHTML = `
         <span class="room-name">${room.htmlID.toUpperCase()}</span>
-        <span class="visitor-count">${count}</span>
+        <span class="visitor-count">[${count}]</span>
     `;
 
     // Toggle CSS classes based on state

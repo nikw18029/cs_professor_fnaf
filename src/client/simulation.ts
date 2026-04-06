@@ -16,10 +16,10 @@ Logger.info("Game is initialized and running.");
 
 // Debug system to toggle map
 // TODO Move to a different file
-let isMapVisible : boolean = true;
-const map : HTMLDivElement = document.querySelector('#map-screen') as HTMLDivElement;
+let isMapVisible: boolean = true;
+const map: HTMLDivElement = document.querySelector('#map-screen') as HTMLDivElement;
 
-document.addEventListener('keydown', (e : KeyboardEvent) => {
+document.addEventListener('keydown', (e: KeyboardEvent) => {
 	if (e.key == 'm')
 		toggleMap();
 });
