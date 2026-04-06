@@ -12,15 +12,15 @@ export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>) {
 
     // rooms
     rooms.forEach(room => {
-        const element = document.getElementById(room.htmlID);
+        const element = room.htmlElement;
         if (!element) return;
 
         // 1. Initial Render
-        updateRoomDisplay(room, element);
+        updateRoomDisplay(room);
 
         // 2. Subscribe to future changes
         room.onUpdate.subscribe((updatedRoom) => {
-            updateRoomDisplay(updatedRoom, element);
+            updateRoomDisplay(updatedRoom);
             
             // Add a little "pulse" effect on change
             element.classList.add('flash');
@@ -36,19 +36,19 @@ function updateTimer(hour: number, el: HTMLElement){
     el.innerText = `${hour}:00`;
 }
 
-function updateRoomDisplay(room: Room, el: HTMLElement) {
+function updateRoomDisplay(room: Room) {
     const count = room.visitorCount;
     
     // Update the inner HTML
-    el.innerHTML = `
-        <span class="room-name">${room.htmlID.toUpperCase()}</span>
+    room.htmlElement.innerHTML = `
+        <span class="room-name">${room.roomName}</span>
         <span class="visitor-count">[${count}]</span>
     `;
 
     // Toggle CSS classes based on state
     if (count > 0) {
-        el.classList.add('has-visitor');
+        room.htmlElement.classList.add('has-visitor');
     } else {
-        el.classList.remove('has-visitor');
+        room.htmlElement.classList.remove('has-visitor');
     }
 }

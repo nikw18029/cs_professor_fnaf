@@ -1,12 +1,14 @@
 import { Character } from "./character.js"
 import { Observable } from "./observable.js"
 import { Vector2 } from "./vector2.js"
+import { setCurrentRoom } from "./room-renderer.js"
 
 /**
  * A room in the map.
  */
 export class Room {
-	public readonly htmlID: string;
+	public readonly htmlElement : HTMLDivElement;
+	public readonly roomName: string;
 	public readonly backgroundImage: string;
     public neighbors: Set<Room>;
     private characterPositions: Record<string, Vector2>; // Visual positions of the characters in the room
@@ -16,18 +18,39 @@ export class Room {
     public onUpdate = new Observable<Room>();
 
     /**
-     * @param htmlID must be verbaitum HTML id. Case sensitive.
+     * @param roomName The name of the room. Case sensitive.
      * @param isPlayerRoom is this the room the player will be in?
      * @param neighbors neighbors of this room. Can set later with connectNeighbors().
      */
-    constructor(htmlID: string, backgroundImage : string, isPlayerRoom: boolean = false, neighbors: Room[] = []) {
-        this.htmlID = htmlID;
+    constructor(roomName: string, backgroundImage : string, isPlayerRoom: boolean = false, neighbors: Room[] = []) {
+        this.roomName = roomName;
+		this.htmlElement = this.createHtmlElement();
 		this.backgroundImage = `img/background/${backgroundImage}.jpg`;
         this.neighbors = new Set(neighbors);
         this.visitors = new Set();
 		this.characterPositions = {};
         this.isPlayerRoom = isPlayerRoom;
     }
+
+	/**
+	 * Constructs an HTMLDiv element for this room.
+	 */
+	private createHtmlElement() : HTMLDivElement {
+		const div = document.createElement("div") as HTMLDivElement;
+		div.classList.add('room-box');
+		div.id = this.roomName.toLowerCase().replace(' ', '-');
+
+		if (this.isPlayerRoom)
+			div.classList.add('player-room');
+		
+		// TODO: Allow room position on the map to be customized
+		div.addEventListener('click', () => {
+			setCurrentRoom(this);
+		})
+
+		document.getElementById('map-grid')?.appendChild(div);
+		return div;
+	}
 
     /**
      * Adds a bi-directional connection between this room and each room in the list.

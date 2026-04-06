@@ -96,7 +96,7 @@ export class Character {
         newRoom.visitorEnter(this);
         this.currentRoom = newRoom;
 		this.onRoomChange.notify(this);
-        Logger.debug(`${this.name} moved to ${newRoom.htmlID}`);
+        Logger.debug(`${this.name} moved to ${newRoom.roomName}`);
     }
 
     /**
