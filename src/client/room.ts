@@ -23,13 +23,13 @@ export class Room {
      * @param neighbors neighbors of this room. Can set later with connectNeighbors().
      */
     constructor(roomName: string, backgroundImage : string, isPlayerRoom: boolean = false, neighbors: Room[] = []) {
-        this.roomName = roomName;
+		this.roomName = roomName;
+        this.isPlayerRoom = isPlayerRoom; // Do this BEFORE generating the HTMLDivElement
 		this.htmlElement = this.createHtmlElement();
 		this.backgroundElement = this.createBackgroundElement(backgroundImage);
         this.neighbors = new Set(neighbors);
         this.visitors = new Set();
 		this.characterPositions = {};
-        this.isPlayerRoom = isPlayerRoom;
     }
 
 	/**
