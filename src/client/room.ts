@@ -33,6 +33,15 @@ export class Room {
     }
 
 	/**
+	 * Sets the map position of the current room. Use percentages so it looks correct regardless of screen size.
+	*/
+	public setPosition(x : number, y : number) : Room {
+		this.htmlElement.style.left = `${x}%`;
+		this.htmlElement.style.top = `${y}%`;
+		return this;
+	}
+
+	/**
 	 * Constructs a HTMLDiv element for this room.
 	 */
 	private createHtmlElement() : HTMLDivElement {

@@ -20,12 +20,18 @@ export class GameStateMgr {
 
     constructor() {
         // build map
-        let start = new Room("start", "back_entrance");
-        let a1 = new Room("a1", "classroom1");
-        let a2 = new Room("a2", "offices");
-        let b1 = new Room("b1", "stage");
-        let b2 = new Room("b2", "staircase");
-        this.playerRoom = new Room("end", "window", true);
+        let start = new Room("start", "back_entrance")
+			.setPosition(20, 20);
+        let a1 = new Room("a1", "classroom1")
+			.setPosition(30, 20);
+        let a2 = new Room("a2", "offices")
+			.setPosition(15, 50);
+        let b1 = new Room("b1", "stage")
+			.setPosition(15, 20);
+        let b2 = new Room("b2", "staircase")
+			.setPosition(85, 50);
+        this.playerRoom = new Room("end", "window", true)
+			.setPosition(80, 60);
 
         a1.connectNeighbors([start, b1, a2, b2]);
         a2.connectNeighbors([a1, b1, b2, this.playerRoom]);

@@ -14,8 +14,7 @@ game.runGame();
 Logger.info("Game is initialized and running.");
 
 
-// Debug system to toggle map
-// TODO Move to a different file
+// Security camera selector
 let isMapVisible: boolean = true;
 const map: HTMLDivElement = document.querySelector('#map-screen') as HTMLDivElement;
 

@@ -8,7 +8,10 @@ This file currently styles the room display. Needs to be updated at some point.
 }
 
 .room-box {
-	width: 6%;
+	position: absolute;
+
+	width: 5%;
+	min-width: 50px;
 	aspect-ratio: 1 / 1;
     box-sizing: border-box; /* Keeps boxes a consistent size, regardless of borders. */
     background-color: #1a1a1a;
