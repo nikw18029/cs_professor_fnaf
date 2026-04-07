@@ -15,23 +15,25 @@ export class GameStateMgr {
     characters: Set<Character>;
     playerRoom: Room;
     onTimerUpdate: Observable<number>;
+    onHideToggled: Observable<boolean>;
     timerID!: number;
     isPlayerHidden: boolean = false;
+    isPlayerKilled: boolean = false;
 
     constructor() {
         // build map
         let start = new Room("start", "back_entrance")
-			.setPosition(20, 20);
+            .setPosition(20, 20);
         let a1 = new Room("a1", "classroom1")
-			.setPosition(30, 20);
+            .setPosition(30, 20);
         let a2 = new Room("a2", "offices")
-			.setPosition(15, 50);
+            .setPosition(15, 50);
         let b1 = new Room("b1", "stage")
-			.setPosition(15, 20);
+            .setPosition(15, 20);
         let b2 = new Room("b2", "staircase")
-			.setPosition(85, 50);
+            .setPosition(85, 50);
         this.playerRoom = new Room("end", "window", true)
-			.setPosition(80, 60);
+            .setPosition(80, 60);
 
         a1.connectNeighbors([start, b1, a2, b2]);
         a2.connectNeighbors([a1, b1, b2, this.playerRoom]);
@@ -42,7 +44,11 @@ export class GameStateMgr {
 
         // bind to html
         this.onTimerUpdate = new Observable<number>();
-        bindUI(this.rooms, this.onTimerUpdate);
+        this.onHideToggled = new Observable<boolean>();
+        this.onHideToggled.subscribe((status) => {
+            this.isPlayerHidden = status;
+        });
+        bindUI(this.rooms, this.onTimerUpdate, this.onHideToggled);
 
         // characters and attack observers
         let sandro = new Character("sandro", start, [a1, a2, this.playerRoom]);
@@ -50,13 +56,13 @@ export class GameStateMgr {
         let bilitski = new Character("bilitski", start, [a1, b2, this.playerRoom]);
         this.characters = new Set([sandro, ohl, bilitski]);
 
-        for(const c of this.characters){
+        for (const c of this.characters) {
             c.onAttack.subscribe((attacker) => {
                 this.handleAttack(attacker);
             });
         }
-		
-		initializeRoomRenderer(start, this.characters);
+
+        initializeRoomRenderer(start, this.characters);
     }
 
     /**
@@ -65,7 +71,7 @@ export class GameStateMgr {
     public async runGame() {
         const gameDurationMins = (config.gameMins as number) * 60000;
         const hourInterval = gameDurationMins / 6;
-        
+
         this.characters.forEach(c => c.activate());
 
         const runHour = (hour: number, interval: number) => {
@@ -96,9 +102,29 @@ export class GameStateMgr {
 
     private handleAttack(c: Character) {
         Logger.info(`${c.name} is attacking!`);
-        // if player fails to defend:
-        // this.stopGame();
-        // temp: simulate attack with timeout
-        setTimeout(() => c.returnToSpawn(), 10000);
+
+        let attackTimeout = config.attackSecsElapsed - config.attackTTK;
+        setTimeout(() => {  // initial TTK timeout, (wait for TTK to elapse)
+            // try to kill at beginning and end of actual attack
+            this.tryKillPlayer();
+            setTimeout(() => {
+                this.tryKillPlayer();
+
+                if (this.isPlayerKilled) {
+                    Logger.info("Player was killed!");
+                    this.stopGame();
+                } else {
+                    Logger.info("Player survived attack.");
+                    c.returnToSpawn();
+                }
+            }, attackTimeout);
+        }, config.attackTTK * 1000);
+    }
+
+    private tryKillPlayer() {
+        if (!this.isPlayerHidden) {
+            // todo: display in ui that player is fkn dead
+            this.isPlayerKilled = true;
+        }
     }
 }
