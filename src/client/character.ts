@@ -17,7 +17,7 @@ export class Character {
     private active: boolean;
     public onAttack: Observable<Character>;
     public onRoomChange: Observable<Character>;
-	private spriteElement! : HTMLImageElement;
+    private spriteElement!: HTMLImageElement;
 
     constructor(name: string, spawnRoom: Room, preferredRooms: Room[]) {
         this.name = name;
@@ -27,37 +27,37 @@ export class Character {
 
         this.currentRoom = spawnRoom;
         this.currentRoom.visitorEnter(this);
-        
-        this.onAttack = new Observable<Character>();
-		this.onRoomChange = new Observable<Character>();
-        this.active = true;
-		this.initializeSprite();
-    }
-	
-	/**
-	 * Creates the sprite element for this character.
-	 */
-	private initializeSprite() {
-		this.spriteElement = document.createElement("img") as HTMLImageElement;
-		console.log(`Character sprite ${this.name}.png loaded.`);
-		this.spriteElement.src = `img/${this.name}.png`;
-		this.spriteElement.classList.add("character-sprite");
 
-		const parent : HTMLElement = document.querySelector("#game-screen") as HTMLElement;
-		parent.appendChild(this.spriteElement);
-	}
+        this.onAttack = new Observable<Character>();
+        this.onRoomChange = new Observable<Character>();
+        this.active = true;
+        this.initializeSprite();
+    }
+
+    /**
+     * Creates the sprite element for this character.
+     */
+    private initializeSprite() {
+        this.spriteElement = document.createElement("img") as HTMLImageElement;
+        console.log(`Character sprite ${this.name}.png loaded.`);
+        this.spriteElement.src = `img/${this.name}.png`;
+        this.spriteElement.classList.add("character-sprite");
+
+        const parent: HTMLElement = document.querySelector("#game-screen") as HTMLElement;
+        parent.appendChild(this.spriteElement);
+    }
 
     private pickNextRoom(): Room {
         const preferredNeighbors: Room[] = [];
         for (const neighbor of this.currentRoom.neighbors) {
-            if(neighbor.isPlayerRoom){  // Prefer player room: if one of the neigbhors is the player's room, make this more likely
-                                        // to choose player's room and skip room selection. Scales with ai lvl
+            if (neighbor.isPlayerRoom) {  // Prefer player room: if one of the neigbhors is the player's room, make this more likely
+                // to choose player's room and skip room selection. Scales with ai lvl
                 let roll = Math.floor(Math.random() * 20) + 1;
-                if(roll <= this.AI_LVL){
+                if (roll <= this.AI_LVL) {
                     return neighbor;
                 }
 
-            }else if (this.preferredRooms.has(neighbor)) {
+            } else if (this.preferredRooms.has(neighbor)) {
                 preferredNeighbors.push(neighbor);
             }
         }
@@ -73,29 +73,29 @@ export class Character {
         return pool[Math.floor(Math.random() * pool.length)] as Room;   // if player room is failed to roll earlier it can still be selected here.
     }
 
-	/**
-	 * Returns the room this character is currently in.
-	 */
-	public getCurrentRoom() : Room {
-		return this.currentRoom;
-	}
+    /**
+     * Returns the room this character is currently in.
+     */
+    public getCurrentRoom(): Room {
+        return this.currentRoom;
+    }
 
-	/**
-	 * Redraws the character's sprite at the give position.
-	 * @param isVisible Determines whether the sprite should be visible or not.
-	 * @param position The position to draw the sprite at.
-	 */
-	public redraw(isVisible : boolean, position : Vector2) {
-		this.spriteElement.style.left = `${position.x}px`;
-		this.spriteElement.style.top = `${position.y}px`;
-		this.spriteElement.style.visibility = isVisible ? "visible" : "hidden";
-	}
+    /**
+     * Redraws the character's sprite at the give position.
+     * @param isVisible Determines whether the sprite should be visible or not.
+     * @param position The position to draw the sprite at.
+     */
+    public redraw(isVisible: boolean, position: Vector2) {
+        this.spriteElement.style.left = `${position.x}px`;
+        this.spriteElement.style.top = `${position.y}px`;
+        this.spriteElement.style.visibility = isVisible ? "visible" : "hidden";
+    }
 
     private moveInto(newRoom: Room) {
         this.currentRoom.visitorExit(this);
         newRoom.visitorEnter(this);
         this.currentRoom = newRoom;
-		this.onRoomChange.notify(this);
+        this.onRoomChange.notify(this);
         Logger.debug(`${this.name} moved to ${newRoom.roomName}`);
     }
 
@@ -109,24 +109,24 @@ export class Character {
      * Request the character to stop by calling .stop()
      */
     public async activate() {
-        if(!this.active) return;
+        if (!this.active) return;
         let waitSecs = config.moveDelay * 1000;
 
         Logger.debug(`${this.name} activated. Move interval: ${waitSecs}`);
 
-        while(this.active){
+        while (this.active) {
             await new Promise(res => setTimeout(res, waitSecs));
-            if(!this.active) break;
+            if (!this.active) break;
 
             let roll = Math.floor(Math.random() * 20) + 1;
             if (roll <= this.AI_LVL) {
                 let nextRoom = this.pickNextRoom();
-                
+
                 if (nextRoom.isPlayerRoom && !nextRoom.hasVisitors()) {
                     this.moveInto(nextRoom);
                     this.onAttack.notify(this); // tell the game state manager we want to attack, it has the logic to run an attack
                     break;  // break or else we could move again while in the player's room, will reactivate when sent back to spawn by game mgr
-                } else if(!nextRoom.isPlayerRoom) {
+                } else if (!nextRoom.isPlayerRoom) {
                     this.moveInto(nextRoom);
                 }
             }

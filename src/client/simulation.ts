@@ -3,7 +3,7 @@
 import { GameStateMgr } from "./game-state-mgr.js";
 import { Logger } from "./logger.js";
 
-Logger.setMinlevel("debug");
+Logger.setMinlevel("trace");
 
 // Initialize the game
 const game = new GameStateMgr();
@@ -24,7 +24,7 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
 		setMapVisibility(!isMapVisible);
 });
 
-function setMapVisibility(isVisible : boolean): void {
+function setMapVisibility(isVisible: boolean): void {
 	isMapVisible = isVisible;
 	map.style.visibility = isMapVisible ? 'visible' : 'hidden';
 }
