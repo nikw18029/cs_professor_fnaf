@@ -2,9 +2,9 @@ import { Observable } from "./observable.js";
 import { Room } from "./room.js"
 import { Logger } from "./logger.js"
 
-// bind the html elements to their object counterparts. this is absolutely a mess lmao
+// bind the html elements to their object counterparts.
 
-export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, hideBtnUpdator: Observable<boolean>) {
+export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, hideBtnUpdator: Observable<boolean>, hideStateUpdator: Observable<{ canHide: boolean; forceUnhide: boolean }>, playerKilledUpdator: Observable<void>) {
     // timer
     const timerEl = document.getElementById("timer");
     if (timerEl) {
@@ -13,7 +13,24 @@ export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, hideB
 
     // hide button
     const hideBtn = document.getElementById('hide-btn');
-    hideBtn?.addEventListener("click", () => { hideBtnClicked(hideBtn, hideBtnUpdator) });
+    if (hideBtn) {
+        hideBtn?.addEventListener("click", () => { hideBtnClicked(hideBtn, hideBtnUpdator) });
+
+        hideStateUpdator.subscribe(({ canHide, forceUnhide }) => {
+            if (forceUnhide) {
+                hideBtn.classList.remove('active');
+                hideBtn.textContent = "HIDE UNDER DESK";
+            }
+
+            if (canHide) {
+                hideBtn.classList.remove('on-cooldown');
+                hideBtn.removeAttribute('disabled');
+            } else {
+                hideBtn.classList.add('on-cooldown');
+                hideBtn.setAttribute('disabled', 'true');
+            }
+        });
+    }
 
     // rooms
     rooms.forEach(room => {
@@ -32,6 +49,16 @@ export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, hideB
             setTimeout(() => element.classList.remove('flash'), 200);
         });
     });
+
+    // player killed
+    playerKilledUpdator.subscribe(showDeathMessage);
+}
+
+function showDeathMessage() {
+    const div = document.createElement('div') as HTMLDivElement;
+    div.textContent = "YOU DIED";
+    div.style = "color: red; font-size: xx-large;";
+    document.getElementById("game-container")?.appendChild(div);
 }
 
 function updateTimer(hour: number, el: HTMLElement) {
@@ -59,6 +86,8 @@ function updateRoomDisplay(room: Room) {
 }
 
 function hideBtnClicked(el: HTMLElement, updator: Observable<boolean>) {
+    if (el.hasAttribute('disabled')) return;    // block on cooldown
+
     if (el.classList.contains('active')) {   // on -> off
         Logger.trace("Hide toggled off");
         updator.notify(false);
