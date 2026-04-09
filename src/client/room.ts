@@ -22,12 +22,12 @@ export class Room {
      * @param isPlayerRoom is this the room the player will be in?
      * @param neighbors neighbors of this room. Can set later with connectNeighbors().
      */
-    constructor(roomName: string, backgroundImage : string, isPlayerRoom: boolean = false, neighbors: Room[] = []) {
+    constructor(roomName: string, visibilityLayer : number = 1, isPlayerRoom: boolean = false) {
 		this.roomName = roomName;
         this.isPlayerRoom = isPlayerRoom; // Do this BEFORE generating the HTMLDivElement
-		this.htmlElement = this.createHtmlElement();
-		this.backgroundElement = this.createBackgroundElement(backgroundImage);
-        this.neighbors = new Set(neighbors);
+		this.htmlElement = this.createHtmlElement(visibilityLayer);
+		this.backgroundElement = this.createBackgroundElement(roomName);
+        this.neighbors = new Set();
         this.visitors = new Set();
 		this.characterPositions = {};
     }
@@ -44,7 +44,7 @@ export class Room {
 	/**
 	 * Constructs a HTMLDiv element for this room.
 	 */
-	private createHtmlElement() : HTMLDivElement {
+	private createHtmlElement(layer : number) : HTMLDivElement {
 		const div = document.createElement('div') as HTMLDivElement;
 		div.classList.add('room-box');
 		div.id = this.roomName.toLowerCase().replace(' ', '-');
@@ -52,12 +52,12 @@ export class Room {
 		if (this.isPlayerRoom)
 			div.classList.add('player-room');
 		
-		// TODO: Allow room position on the map to be customized
+		// Listen for room changes
 		div.addEventListener('click', () => {
 			setCurrentRoom(this);
 		})
 
-		document.getElementById('map-grid')?.appendChild(div);
+		document.getElementById(`map-layer-${layer}`)?.appendChild(div);
 		return div;
 	}
 

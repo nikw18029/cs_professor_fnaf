@@ -14,7 +14,7 @@
 	overflow: hidden;
 }
 
-#map-screen {
+#map-screen, .map-layer {
 	/* Overlays on top of the entire viewport. */
 	position: absolute;
 	left: 0px;

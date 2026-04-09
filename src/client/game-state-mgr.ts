@@ -32,17 +32,17 @@ export class GameStateMgr {
         this.onPlayerKilled = new Observable();
 
         // build map
-        let start = new Room("start", "back_entrance")
+        let start = new Room("back_entrance", 1)
             .setPosition(20, 20);
-        let a1 = new Room("a1", "classroom1")
+        let a1 = new Room("classroom1", 1)
             .setPosition(30, 20);
-        let a2 = new Room("a2", "offices")
+        let a2 = new Room("offices", 2)
             .setPosition(15, 50);
-        let b1 = new Room("b1", "stage")
+        let b1 = new Room("stage", 1)
             .setPosition(15, 20);
-        let b2 = new Room("b2", "staircase")
+        let b2 = new Room("staircase", 1)
             .setPosition(85, 50);
-        this.playerRoom = new Room("end", "window", true)
+        this.playerRoom = new Room("window", 2, true)
             .setPosition(80, 60);
 
         a1.connectNeighbors([start, b1, a2, b2]);

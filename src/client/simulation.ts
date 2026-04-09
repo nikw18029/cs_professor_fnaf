@@ -15,16 +15,20 @@ Logger.info("Game is initialized and running.");
 
 
 // Security camera selector
-let isMapVisible: boolean = true;
-const map: HTMLDivElement = document.querySelector('#map-screen') as HTMLDivElement;
+let mapVisibilityLayer: number = 0;
+const map1: HTMLDivElement = document.querySelector('#map-layer-1') as HTMLDivElement;
+const map2: HTMLDivElement = document.querySelector('#map-layer-2') as HTMLDivElement;
 
-setMapVisibility(false); // Start hidden
+setMapVisibility(0); // Start hidden
 document.addEventListener('keydown', (e: KeyboardEvent) => {
-	if (e.key == 'm')
-		setMapVisibility(!isMapVisible);
+	if (e.key == '1')
+		setMapVisibility(1);
+	else if (e.key == '2')
+		setMapVisibility(2);
 });
 
-function setMapVisibility(isVisible: boolean): void {
-	isMapVisible = isVisible;
-	map.style.visibility = isMapVisible ? 'visible' : 'hidden';
+function setMapVisibility(targetLayer: number): void {
+	mapVisibilityLayer = mapVisibilityLayer == targetLayer ? 0 : targetLayer;
+	map1.style.visibility = mapVisibilityLayer == 1 ? 'visible' : 'hidden';
+	map2.style.visibility = mapVisibilityLayer == 2 ? 'visible' : 'hidden';
 }
