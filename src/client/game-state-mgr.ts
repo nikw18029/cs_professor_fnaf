@@ -72,13 +72,29 @@ export class GameStateMgr {
 
 		// Second floor rooms
 		const offices = new Room("offices", 2)
-			.setPosition(35, 20);
+			.setPosition(35, 20)
+			.setCharacterPosition(this.SANDRO_KEY, { x: 56, y : 52, z: -0.5})
+			.setCharacterPosition(this.BILITSKI_KEY, { x: 90, y : 60, z: 1})
+			.setCharacterPosition(this.OHL_KEY, { x: 65, y : 70, z: 1.5})
+			.setCharacterPosition(this.DEEPAK_KEY, { x: 15, y : 55, z: -0.5 });
 		const upperHall = new Room("upper hall", 2)
-			.setPosition(50, 50);
+			.setPosition(50, 50)
+			.setCharacterPosition(this.SANDRO_KEY, { x: 50, y : 62, z: 0.8})
+			.setCharacterPosition(this.BILITSKI_KEY, { x: 45, y : 62, z: 0.3})
+			.setCharacterPosition(this.OHL_KEY, { x: 40, y : 70, z: -1.5})
+			.setCharacterPosition(this.DEEPAK_KEY, { x: 41, y : 60, z: -0.2 });
 		const upperStairs = new Room("upper stairs", 2)
-			.setPosition(65, 80);
+			.setPosition(65, 80)
+			.setCharacterPosition(this.SANDRO_KEY, { x: 80, y : 50, z: 1.5})
+			.setCharacterPosition(this.BILITSKI_KEY, { x: 20, y : 65, z: -0.4})
+			.setCharacterPosition(this.OHL_KEY, { x: 32, y : 55, z: 0.8})
+			.setCharacterPosition(this.DEEPAK_KEY, { x: 14, y : 55, z: 0.2 });
 		this.playerRoom = new Room("window", 2, true)
-			.setPosition(35, 50);
+			.setPosition(35, 50)
+			.setCharacterPosition(this.SANDRO_KEY, { x: 42, y : 40, z: 1})
+			.setCharacterPosition(this.BILITSKI_KEY, { x: 42, y : 40, z: 1})
+			.setCharacterPosition(this.OHL_KEY, { x: 42, y : 40, z: 1})
+			.setCharacterPosition(this.DEEPAK_KEY, { x: 42, y : 40, z: 1});
 		upperStairs.connectNeighbors([upperHall, lowerStairs, this.playerRoom]);
 		upperHall.connectNeighbors([offices, backEntry, this.playerRoom]);
 
@@ -102,8 +118,8 @@ export class GameStateMgr {
 		// characters and attack observers
 		let sandro = new Character(this.SANDRO_KEY, classroomA, [classroomA, wingA, this.playerRoom]);
 		let ohl = new Character(this.OHL_KEY, classroomB, [lowerStairs, this.playerRoom]);
-		let bilitski = new Character(this.BILITSKI_KEY, lowerStairs, [classroomA, this.playerRoom]);
-		let deepak = new Character(this.DEEPAK_KEY, backEntry, [offices, this.playerRoom]);
+		let bilitski = new Character(this.BILITSKI_KEY, backEntry, [classroomA, this.playerRoom]);
+		let deepak = new Character(this.DEEPAK_KEY, offices, [offices, this.playerRoom]);
 		this.characters = new Set([sandro, ohl, bilitski, deepak]);
 
 		for (const c of this.characters) {
