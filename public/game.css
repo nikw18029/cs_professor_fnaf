@@ -14,16 +14,6 @@
 	overflow: hidden;
 }
 
-#map-screen,
-.map-layer {
-	/* Overlays on top of the entire viewport. */
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	width: 100%;
-	height: 100%;
-}
-
 .room-img {
 	position: absolute;
 	/* Ensures the background image takes up the entire game screen. */

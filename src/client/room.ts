@@ -68,7 +68,7 @@ export class Room {
 		const img = document.createElement('img') as HTMLImageElement;
 		img.src = `img/background/${src}.jpg`;
 		img.classList.add('room-img');
-		img.style.visibility = 'hidden'; // Hide by default
+		img.style.display = 'none'; // Hide by default
 
 		// Add it to the game screen
 		document.querySelector('#game-screen')?.appendChild(img);

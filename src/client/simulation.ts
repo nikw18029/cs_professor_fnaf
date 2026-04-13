@@ -29,6 +29,7 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
 
 function setMapVisibility(targetLayer: number): void {
 	mapVisibilityLayer = mapVisibilityLayer == targetLayer ? 0 : targetLayer;
-	map1.style.visibility = mapVisibilityLayer == 1 ? 'visible' : 'hidden';
-	map2.style.visibility = mapVisibilityLayer == 2 ? 'visible' : 'hidden';
+
+	map1.style.display = mapVisibilityLayer == 1 ? 'block' : 'none';
+	map2.style.display = mapVisibilityLayer == 2 ? 'block' : 'none';
 }

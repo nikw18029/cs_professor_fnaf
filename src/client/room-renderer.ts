@@ -31,12 +31,12 @@ export function setCurrentRoom(room : Room) {
 	if (currentRoom != undefined)
 	{
 		currentRoom.htmlElement.classList.remove('current');
-		currentRoom.backgroundElement.style.visibility = 'hidden';
+		currentRoom.backgroundElement.style.display = 'none';
 	}
 	
 	currentRoom = room;
 	currentRoom.htmlElement.classList.add('current');
-	currentRoom.backgroundElement.style.visibility = 'visible';
+	currentRoom.backgroundElement.style.display = 'block';
 	redraw();
 }
 
