@@ -64,7 +64,7 @@ export class GameStateMgr {
 			.setCharacterPosition(this.OHL_KEY, { x: 58, y : 42, z: 1.5})
 			.setCharacterPosition(this.DEEPAK_KEY, { x: 15, y : 42, z: -0.4 });
 
-		classroomA.connectNeighbors([lowerStairs, wingA]);
+		classroomA.connectNeighbors([wingA]);
 		classroomB.connectNeighbors([lowerStairs]);
 		wingA.connectNeighbors([classroomA, lowerStairs]);
 		backEntry.connectNeighbors([lowerStairs]);
