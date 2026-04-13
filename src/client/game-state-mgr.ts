@@ -35,29 +35,33 @@ export class GameStateMgr {
 		const backEntry = new Room("back entry", 1)
 			.setPosition(50, 20);
 		const classroomA = new Room("class a", 1)
-			.setPosition(20, 80);
-		const wingB = new Room("wing b", 1)
-			.setPosition(15, 50);
-		const stage = new Room("stage", 1)
-			.setPosition(50, 50);
+			.setPosition(25, 60);
+		const classroomB = new Room("class a", 1)
+			.setPosition(75, 60);
+		const wingA = new Room("wing a", 1)
+			.setPosition(35, 50);
+		const lowerStairs = new Room("lower stairs", 1)
+			.setPosition(65, 50);
 
-		classroomA.connectNeighbors([backEntry, stage, wingB]);
-		wingB.connectNeighbors([classroomA, stage]);
-		stage.connectNeighbors([backEntry, classroomA, wingB]);
+		classroomA.connectNeighbors([lowerStairs, wingA]);
+		classroomB.connectNeighbors([lowerStairs]);
+		wingA.connectNeighbors([classroomA, lowerStairs]);
+		backEntry.connectNeighbors([lowerStairs]);
+		lowerStairs.connectNeighbors([backEntry, wingA, classroomB]);
 
 		// Second floor rooms
 		const offices = new Room("offices", 2)
-			.setPosition(50, 20);
+			.setPosition(35, 20);
 		const upperHall = new Room("upper hall", 2)
 			.setPosition(50, 50);
 		const upperStairs = new Room("upper stairs", 2)
-			.setPosition(70, 80);
+			.setPosition(65, 80);
 		this.playerRoom = new Room("window", 2, true)
-			.setPosition(30, 50);
-		upperStairs.connectNeighbors([upperHall, this.playerRoom]);
-		upperHall.connectNeighbors([offices, this.playerRoom]);
+			.setPosition(35, 50);
+		upperStairs.connectNeighbors([upperHall, lowerStairs, this.playerRoom]);
+		upperHall.connectNeighbors([offices, backEntry, this.playerRoom]);
 
-		this.rooms = new Set([backEntry, classroomA, wingB, stage,
+		this.rooms = new Set([backEntry, classroomA, wingA, classroomB, lowerStairs,
 			offices, upperHall, upperStairs, this.playerRoom]);
 
 		// bind to html
@@ -75,10 +79,11 @@ export class GameStateMgr {
 		bindUI(this.rooms, this.onTimerUpdate, this.onHideToggled, this.onHideStateChanged, this.onPlayerKilled);
 
 		// characters and attack observers
-		let sandro = new Character("sandro", backEntry, [classroomA, wingB, this.playerRoom]);
-		let ohl = new Character("ohl", backEntry, [stage, this.playerRoom]);
+		let sandro = new Character("sandro", backEntry, [classroomA, wingA, this.playerRoom]);
+		let ohl = new Character("ohl", backEntry, [lowerStairs, this.playerRoom]);
 		let bilitski = new Character("bilitski", backEntry, [classroomA, this.playerRoom]);
-		this.characters = new Set([sandro, ohl, bilitski]);
+		let deepak = new Character("deepak", backEntry, [offices, this.playerRoom]);
+		this.characters = new Set([sandro, ohl, bilitski, deepak]);
 
 		for (const c of this.characters) {
 			c.onAttack.subscribe((attacker) => {
