@@ -1,6 +1,6 @@
 import { Character } from "./character.js";
 import { Room } from "./room.js"
-import { Vector2 } from "./vector2.js";
+import { Vector3 } from "./vector3.js";
 
 /**
  * 
@@ -47,7 +47,7 @@ function redraw(): void {
 	// Redraw the characters
 	characters.forEach(character => {
 		const isVisible : boolean = character.getCurrentRoom() == currentRoom;
-		const position : Vector2 = currentRoom.getCharacterPosition(character.name);
+		const position : Vector3 = currentRoom.getCharacterPosition(character.name);
 		character.redraw(isVisible, position);
 	});
 }

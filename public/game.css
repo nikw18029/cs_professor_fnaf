@@ -35,4 +35,7 @@
 	position: absolute;
 	left: 100px;
 	top: 100px;
+	aspect-ratio: 1;
+	image-rendering: pixelated;
+	user-select: none;
 }

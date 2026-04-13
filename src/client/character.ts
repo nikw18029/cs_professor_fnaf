@@ -2,7 +2,7 @@ import { Room } from "./room.js"
 import { Logger } from "./logger.js"
 import config from "./config.js"
 import { Observable } from "./observable.js";
-import { Vector2 } from "./vector2.js";
+import { Vector3 } from "./vector3.js";
 
 /**
  * A character that can move and trigger an attack
@@ -85,9 +85,12 @@ export class Character {
      * @param isVisible Determines whether the sprite should be visible or not.
      * @param position The position to draw the sprite at.
      */
-    public redraw(isVisible: boolean, position: Vector2) {
-        this.spriteElement.style.left = `${position.x}px`;
-        this.spriteElement.style.top = `${position.y}px`;
+    public redraw(isVisible: boolean, position: Vector3) {
+        this.spriteElement.style.left = `${position.x}%`;
+        this.spriteElement.style.top = `${position.y}%`;
+		this.spriteElement.style.width = `${20 * Math.abs(position.z)}%`;
+		this.spriteElement.style.transform = `scaleX(${Math.sign(position.z)})`;
+		this.spriteElement.style.zIndex = `${Math.round(position.y)}`;
         this.spriteElement.style.visibility = isVisible ? "visible" : "hidden";
     }
 

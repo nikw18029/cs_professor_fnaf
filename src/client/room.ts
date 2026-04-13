@@ -1,6 +1,6 @@
 import { Character } from "./character.js"
 import { Observable } from "./observable.js"
-import { Vector2 } from "./vector2.js"
+import { Vector3 } from "./vector3.js"
 import { setCurrentRoom } from "./room-renderer.js"
 
 /**
@@ -11,7 +11,7 @@ export class Room {
 	public readonly htmlElement: HTMLDivElement;
 	public readonly backgroundElement: HTMLImageElement;
 	public neighbors: Set<Room>;
-	private characterPositions: Record<string, Vector2>; // Visual positions of the characters in the room
+	private characterPositions: Record<string, Vector3>; // Visual positions of the characters in the room
 	private visitors: Set<Character>;
 	public readonly isPlayerRoom;
 
@@ -91,22 +91,23 @@ export class Room {
 	/**
 	 * Gets the visual position of a particular character.
 	 * @param character The character to associate this position with. Should ideally be a Character object's name.
-	 * @param position The visual position on the screen.
+	 * @param position The visual position on the screen. Z is the scale.
 	 */
-	public getCharacterPosition(character: string): Vector2 {
+	public getCharacterPosition(character: string): Vector3 {
 		if (this.characterPositions[character])
-			return this.characterPositions[character] as Vector2;
+			return this.characterPositions[character] as Vector3;
 
-		return { x: 0, y: 0 };
+		return { x: 0, y: 0, z: 1 };
 	}
 
 	/**
 	 * Registers the position of a given character.
-	 * @param character The character to associate this position with. Should ideally be a Character object's name.
+	 * @param character The character to associate this position with. Must be the Character object's name.
 	 * @param position The visual position on the screen.
 	 */
-	public setCharacterPosition(character: string, position: Vector2) {
+	public setCharacterPosition(character: string, position: Vector3): Room {
 		this.characterPositions[character] = position;
+		return this;
 	}
 
 	/**

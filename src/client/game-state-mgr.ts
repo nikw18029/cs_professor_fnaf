@@ -28,12 +28,21 @@ export class GameStateMgr {
 	private cooldownTimer: ReturnType<typeof setTimeout> | null = null;
 	private hideCooldownActive: boolean = false;
 
+	private readonly SANDRO_KEY = "sandro";
+	private readonly OHL_KEY = "ohl";
+	private readonly BILITSKI_KEY = "bilitski";
+	private readonly DEEPAK_KEY = "deepak";
+
 	constructor() {
 		this.onPlayerKilled = new Observable();
 
 		// Build Map
 		const backEntry = new Room("back entry", 1)
-			.setPosition(50, 20);
+			.setPosition(50, 20)
+			.setCharacterPosition(this.SANDRO_KEY, { x: 35, y : 45, z: -1})
+			.setCharacterPosition(this.BILITSKI_KEY, { x: 70, y : 60, z: -2})
+			.setCharacterPosition(this.OHL_KEY, { x: 50, y : 50, z: 1.2})
+			.setCharacterPosition(this.DEEPAK_KEY, { x: 8, y : 50, z: 1.5 });
 		const classroomA = new Room("class a", 1)
 			.setPosition(25, 60);
 		const classroomB = new Room("class a", 1)
@@ -79,10 +88,10 @@ export class GameStateMgr {
 		bindUI(this.rooms, this.onTimerUpdate, this.onHideToggled, this.onHideStateChanged, this.onPlayerKilled);
 
 		// characters and attack observers
-		let sandro = new Character("sandro", backEntry, [classroomA, wingA, this.playerRoom]);
-		let ohl = new Character("ohl", backEntry, [lowerStairs, this.playerRoom]);
-		let bilitski = new Character("bilitski", backEntry, [classroomA, this.playerRoom]);
-		let deepak = new Character("deepak", backEntry, [offices, this.playerRoom]);
+		let sandro = new Character(this.SANDRO_KEY, backEntry, [classroomA, wingA, this.playerRoom]);
+		let ohl = new Character(this.OHL_KEY, backEntry, [lowerStairs, this.playerRoom]);
+		let bilitski = new Character(this.BILITSKI_KEY, backEntry, [classroomA, this.playerRoom]);
+		let deepak = new Character(this.DEEPAK_KEY, backEntry, [offices, this.playerRoom]);
 		this.characters = new Set([sandro, ohl, bilitski, deepak]);
 
 		for (const c of this.characters) {
