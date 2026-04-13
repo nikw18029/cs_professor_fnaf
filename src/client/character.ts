@@ -90,7 +90,7 @@ export class Character {
         this.spriteElement.style.top = `${position.y}%`;
 		this.spriteElement.style.width = `${20 * Math.abs(position.z)}%`;
 		this.spriteElement.style.transform = `scaleX(${Math.sign(position.z)})`;
-		this.spriteElement.style.zIndex = `${Math.round(position.y)}`;
+		this.spriteElement.style.zIndex = `${Math.round(position.y * Math.abs(position.z))}`;
 		this.spriteElement.style.display = isVisible ? 'block' : 'none';
     }
 

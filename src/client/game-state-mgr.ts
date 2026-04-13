@@ -44,13 +44,25 @@ export class GameStateMgr {
 			.setCharacterPosition(this.OHL_KEY, { x: 50, y : 50, z: 1.2})
 			.setCharacterPosition(this.DEEPAK_KEY, { x: 8, y : 50, z: 1.5 });
 		const classroomA = new Room("class a", 1)
-			.setPosition(25, 60);
-		const classroomB = new Room("class a", 1)
+			.setPosition(25, 60)
+			.setCharacterPosition(this.SANDRO_KEY, { x: 50, y : 55, z: -0.5})
+			.setCharacterPosition(this.BILITSKI_KEY, { x: 41, y : 56, z: 0.45})
+			.setCharacterPosition(this.OHL_KEY, { x: 47, y : 60, z: -2})
+			.setCharacterPosition(this.DEEPAK_KEY, { x: 8, y : 58, z: 0.6 });
+		const classroomB = new Room("class a", 1) // TODO Replace with picture of classroom b
 			.setPosition(75, 60);
 		const wingA = new Room("wing a", 1)
-			.setPosition(35, 50);
+			.setPosition(35, 50)
+			.setCharacterPosition(this.SANDRO_KEY, { x: -5, y : 40, z: 3})
+			.setCharacterPosition(this.BILITSKI_KEY, { x: 60, y : 56, z: -2})
+			.setCharacterPosition(this.OHL_KEY, { x: 35, y : 40, z: 0.8})
+			.setCharacterPosition(this.DEEPAK_KEY, { x: 50.5, y : 38, z: -0.3 });
 		const lowerStairs = new Room("lower stairs", 1)
-			.setPosition(65, 50);
+			.setPosition(65, 50)
+			.setCharacterPosition(this.SANDRO_KEY, { x: 45, y : 0, z: -0.8})
+			.setCharacterPosition(this.BILITSKI_KEY, { x: -5, y : 60, z: 2})
+			.setCharacterPosition(this.OHL_KEY, { x: 58, y : 42, z: 1.5})
+			.setCharacterPosition(this.DEEPAK_KEY, { x: 15, y : 42, z: -0.4 });
 
 		classroomA.connectNeighbors([lowerStairs, wingA]);
 		classroomB.connectNeighbors([lowerStairs]);
@@ -88,9 +100,9 @@ export class GameStateMgr {
 		bindUI(this.rooms, this.onTimerUpdate, this.onHideToggled, this.onHideStateChanged, this.onPlayerKilled);
 
 		// characters and attack observers
-		let sandro = new Character(this.SANDRO_KEY, backEntry, [classroomA, wingA, this.playerRoom]);
-		let ohl = new Character(this.OHL_KEY, backEntry, [lowerStairs, this.playerRoom]);
-		let bilitski = new Character(this.BILITSKI_KEY, backEntry, [classroomA, this.playerRoom]);
+		let sandro = new Character(this.SANDRO_KEY, classroomA, [classroomA, wingA, this.playerRoom]);
+		let ohl = new Character(this.OHL_KEY, classroomB, [lowerStairs, this.playerRoom]);
+		let bilitski = new Character(this.BILITSKI_KEY, lowerStairs, [classroomA, this.playerRoom]);
 		let deepak = new Character(this.DEEPAK_KEY, backEntry, [offices, this.playerRoom]);
 		this.characters = new Set([sandro, ohl, bilitski, deepak]);
 

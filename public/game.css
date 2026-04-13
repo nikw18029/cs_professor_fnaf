@@ -28,4 +28,6 @@
 	aspect-ratio: 1;
 	image-rendering: pixelated;
 	user-select: none;
+	/* Outlines so characters don't get lost in the background. */
+	filter: drop-shadow(2px 2px 0 black) drop-shadow(-2px -2px 0 black) drop-shadow(-2px 2px 0 black) drop-shadow(2px -2px 0 black);
 }
