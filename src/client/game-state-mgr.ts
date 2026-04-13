@@ -11,195 +11,203 @@ import config from "./config.js"
  * The orchestrator for the game
  */
 export class GameStateMgr {
-    rooms: Set<Room>;
-    characters: Set<Character>;
-    playerRoom: Room;
-    onTimerUpdate: Observable<number>;
-    hourTimerID: ReturnType<typeof setTimeout> | null = null;
-    onPlayerKilled: Observable<void>;
-    isPlayerKilled: boolean = false;
+	rooms: Set<Room>;
+	characters: Set<Character>;
+	playerRoom: Room;
+	onTimerUpdate: Observable<number>;
+	hourTimerID: ReturnType<typeof setTimeout> | null = null;
+	onPlayerKilled: Observable<void>;
+	isPlayerKilled: boolean = false;
 
-    // hide tracking
-    isPlayerHidden: boolean = false;
-    onHideToggled: Observable<boolean>;
-    onHideStateChanged: Observable<{ canHide: boolean; forceUnhide: boolean }>;
-    private hideStartTime: number = 0;
-    private forceUnhideTimer: ReturnType<typeof setTimeout> | null = null;
-    private cooldownTimer: ReturnType<typeof setTimeout> | null = null;
-    private hideCooldownActive: boolean = false;
+	// hide tracking
+	isPlayerHidden: boolean = false;
+	onHideToggled: Observable<boolean>;
+	onHideStateChanged: Observable<{ canHide: boolean; forceUnhide: boolean }>;
+	private hideStartTime: number = 0;
+	private forceUnhideTimer: ReturnType<typeof setTimeout> | null = null;
+	private cooldownTimer: ReturnType<typeof setTimeout> | null = null;
+	private hideCooldownActive: boolean = false;
 
-    constructor() {
-        this.onPlayerKilled = new Observable();
+	constructor() {
+		this.onPlayerKilled = new Observable();
 
-        // build map
-        let start = new Room("back_entrance", 1)
-            .setPosition(20, 20);
-        let a1 = new Room("classroom1", 1)
-            .setPosition(30, 20);
-        let a2 = new Room("offices", 2)
-            .setPosition(15, 50);
-        let b1 = new Room("stage", 1)
-            .setPosition(15, 20);
-        let b2 = new Room("staircase", 1)
-            .setPosition(85, 50);
-        this.playerRoom = new Room("window", 2, true)
-            .setPosition(80, 60);
+		// Build Map
+		const backEntry = new Room("back entry", 1)
+			.setPosition(50, 20);
+		const classroomA = new Room("class a", 1)
+			.setPosition(20, 80);
+		const wingB = new Room("wing b", 1)
+			.setPosition(15, 50);
+		const stage = new Room("stage", 1)
+			.setPosition(50, 50);
 
-        a1.connectNeighbors([start, b1, a2, b2]);
-        a2.connectNeighbors([a1, b1, b2, this.playerRoom]);
-        b1.connectNeighbors([start, a1, a2, b2]);
-        b2.connectNeighbors([b1, a1, a2, this.playerRoom]);
+		classroomA.connectNeighbors([backEntry, stage, wingB]);
+		wingB.connectNeighbors([classroomA, stage]);
+		stage.connectNeighbors([backEntry, classroomA, wingB]);
 
-        this.rooms = new Set([start, a1, a2, b1, b2, this.playerRoom]);
+		// Second floor rooms
+		const offices = new Room("offices", 2)
+			.setPosition(50, 20);
+		const upperHall = new Room("upper hall", 2)
+			.setPosition(50, 50);
+		const upperStairs = new Room("upper stairs", 2)
+			.setPosition(70, 80);
+		this.playerRoom = new Room("window", 2, true)
+			.setPosition(30, 50);
+		upperStairs.connectNeighbors([upperHall, this.playerRoom]);
+		upperHall.connectNeighbors([offices, this.playerRoom]);
 
-        // bind to html
-        this.onTimerUpdate = new Observable<number>();
-        this.onHideToggled = new Observable<boolean>();
-        this.onHideStateChanged = new Observable<{ canHide: boolean; forceUnhide: boolean }>();
+		this.rooms = new Set([backEntry, classroomA, wingB, stage,
+			offices, upperHall, upperStairs, this.playerRoom]);
 
-        this.onHideToggled.subscribe((wantsToHide) => {
-            if (wantsToHide) {
-                this.startHiding();
-            } else {
-                this.stopHiding(false);
-            }
-        });
-        bindUI(this.rooms, this.onTimerUpdate, this.onHideToggled, this.onHideStateChanged, this.onPlayerKilled);
+		// bind to html
+		this.onTimerUpdate = new Observable<number>();
+		this.onHideToggled = new Observable<boolean>();
+		this.onHideStateChanged = new Observable<{ canHide: boolean; forceUnhide: boolean }>();
 
-        // characters and attack observers
-        let sandro = new Character("sandro", start, [a1, a2, this.playerRoom]);
-        let ohl = new Character("ohl", start, [b1, b2, this.playerRoom]);
-        let bilitski = new Character("bilitski", start, [a1, b2, this.playerRoom]);
-        this.characters = new Set([sandro, ohl, bilitski]);
+		this.onHideToggled.subscribe((wantsToHide) => {
+			if (wantsToHide) {
+				this.startHiding();
+			} else {
+				this.stopHiding(false);
+			}
+		});
+		bindUI(this.rooms, this.onTimerUpdate, this.onHideToggled, this.onHideStateChanged, this.onPlayerKilled);
 
-        for (const c of this.characters) {
-            c.onAttack.subscribe((attacker) => {
-                this.handleAttack(attacker);
-            });
-        }
+		// characters and attack observers
+		let sandro = new Character("sandro", backEntry, [classroomA, wingB, this.playerRoom]);
+		let ohl = new Character("ohl", backEntry, [stage, this.playerRoom]);
+		let bilitski = new Character("bilitski", backEntry, [classroomA, this.playerRoom]);
+		this.characters = new Set([sandro, ohl, bilitski]);
 
-        initializeRoomRenderer(start, this.characters);
-    }
+		for (const c of this.characters) {
+			c.onAttack.subscribe((attacker) => {
+				this.handleAttack(attacker);
+			});
+		}
 
-    /**
-     * Starts up each character, runs a timer.
-     */
-    public async runGame() {
-        const gameDurationMins = (config.gameMins as number) * 60000;
-        const hourInterval = gameDurationMins / 6;
+		initializeRoomRenderer(this.playerRoom, this.characters);
+	}
 
-        this.characters.forEach(c => c.activate());
+	/**
+	 * Starts up each character, runs a timer.
+	 */
+	public async runGame() {
+		const gameDurationMins = (config.gameMins as number) * 60000;
+		const hourInterval = gameDurationMins / 6;
 
-        const runHour = (hour: number, interval: number) => {
-            if (hour > 6) return;
+		this.characters.forEach(c => c.activate());
 
-            this.hourTimerID = setTimeout(() => {
-                this.onTimerUpdate.notify(hour);
+		const runHour = (hour: number, interval: number) => {
+			if (hour > 6) return;
 
-                if (hour === 6) {
-                    this.stopGame();
-                } else {
-                    runHour(hour + 1, interval);
-                }
-            }, interval);
-        };
+			this.hourTimerID = setTimeout(() => {
+				this.onTimerUpdate.notify(hour);
 
-        runHour(1, hourInterval);
-    }
+				if (hour === 6) {
+					this.stopGame();
+				} else {
+					runHour(hour + 1, interval);
+				}
+			}, interval);
+		};
 
-    /**
-     * Requests to stop game loops.
-     */
-    public stopGame() {
-        if (this.hourTimerID) clearTimeout(this.hourTimerID);
-        if (this.forceUnhideTimer) clearTimeout(this.forceUnhideTimer);
-        if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
-        this.characters.forEach(c => c.stop());
-        Logger.info("Game stopped");
-    }
+		runHour(1, hourInterval);
+	}
 
-    private startHiding() {
-        if (this.hideCooldownActive) {
-            Logger.trace("Hide blocked — on cooldown");
-            return;
-        }
+	/**
+	 * Requests to stop game loops.
+	 */
+	public stopGame() {
+		if (this.hourTimerID) clearTimeout(this.hourTimerID);
+		if (this.forceUnhideTimer) clearTimeout(this.forceUnhideTimer);
+		if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
+		this.characters.forEach(c => c.stop());
+		Logger.info("Game stopped");
+	}
 
-        this.isPlayerHidden = true;
-        this.hideStartTime = Date.now();
-        Logger.trace("Player started hiding");
+	private startHiding() {
+		if (this.hideCooldownActive) {
+			Logger.trace("Hide blocked — on cooldown");
+			return;
+		}
 
-        // force-stop after max duration
-        this.forceUnhideTimer = setTimeout(() => {
-            Logger.info("Hide time exceeded — forcing unhide");
-            this.stopHiding(true);
-        }, config.hideTimeMaxSecs * 1000);
-    }
+		this.isPlayerHidden = true;
+		this.hideStartTime = Date.now();
+		Logger.trace("Player started hiding");
 
-    /**
-     * @param forced true if the hide was ended by the timer, not the player
-     */
-    private stopHiding(forced: boolean) {
-        if (!this.isPlayerHidden) return; // no-op if already unhidden
+		// force-stop after max duration
+		this.forceUnhideTimer = setTimeout(() => {
+			Logger.info("Hide time exceeded — forcing unhide");
+			this.stopHiding(true);
+		}, config.hideTimeMaxSecs * 1000);
+	}
 
-        this.isPlayerHidden = false;
-        if (this.forceUnhideTimer) {
-            clearTimeout(this.forceUnhideTimer);
-            this.forceUnhideTimer = null;
-        }
+	/**
+	 * @param forced true if the hide was ended by the timer, not the player
+	 */
+	private stopHiding(forced: boolean) {
+		if (!this.isPlayerHidden) return; // no-op if already unhidden
 
-        const hideDurationSecs = (Date.now() - this.hideStartTime) / 1000;
-        Logger.trace(`Player hid for ${hideDurationSecs.toFixed(1)}s`);
+		this.isPlayerHidden = false;
+		if (this.forceUnhideTimer) {
+			clearTimeout(this.forceUnhideTimer);
+			this.forceUnhideTimer = null;
+		}
 
-        // tell UI to reset the button
-        if (forced) {
-            this.onHideStateChanged.notify({ canHide: false, forceUnhide: true });
-        }
+		const hideDurationSecs = (Date.now() - this.hideStartTime) / 1000;
+		Logger.trace(`Player hid for ${hideDurationSecs.toFixed(1)}s`);
 
-        // start cooldown scaled to how long player hid
-        this.startCooldown(hideDurationSecs);
-    }
+		// tell UI to reset the button
+		if (forced) {
+			this.onHideStateChanged.notify({ canHide: false, forceUnhide: true });
+		}
 
-    private startCooldown(hideDurationSecs: number) {
-        const cooldownMs = hideDurationSecs * 2 * 1000;
-        this.hideCooldownActive = true;
-        this.onHideStateChanged.notify({ canHide: false, forceUnhide: false });
-        Logger.trace(`Hide cooldown: ${(cooldownMs / 1000).toFixed(1)}s`);
+		// start cooldown scaled to how long player hid
+		this.startCooldown(hideDurationSecs);
+	}
 
-        this.cooldownTimer = setTimeout(() => {
-            this.hideCooldownActive = false;
-            this.cooldownTimer = null;
-            this.onHideStateChanged.notify({ canHide: true, forceUnhide: false });
-            Logger.trace("Hide cooldown ended");
-        }, cooldownMs);
-    }
+	private startCooldown(hideDurationSecs: number) {
+		const cooldownMs = hideDurationSecs * 2 * 1000;
+		this.hideCooldownActive = true;
+		this.onHideStateChanged.notify({ canHide: false, forceUnhide: false });
+		Logger.trace(`Hide cooldown: ${(cooldownMs / 1000).toFixed(1)}s`);
 
-    private handleAttack(c: Character) {
-        if (this.isPlayerKilled) return;
+		this.cooldownTimer = setTimeout(() => {
+			this.hideCooldownActive = false;
+			this.cooldownTimer = null;
+			this.onHideStateChanged.notify({ canHide: true, forceUnhide: false });
+			Logger.trace("Hide cooldown ended");
+		}, cooldownMs);
+	}
 
-        Logger.info(`${c.name} is attacking!`);
+	private handleAttack(c: Character) {
+		if (this.isPlayerKilled) return;
 
-        let attackTimeout = config.attackSecsElapsed - config.attackTTK;
-        setTimeout(() => {  // initial TTK timeout, (wait for TTK to elapse)
-            // try to kill at beginning and end of actual attack
-            this.tryKillPlayer();
-            setTimeout(() => {
-                this.tryKillPlayer();
+		Logger.info(`${c.name} is attacking!`);
 
-                if (this.isPlayerKilled) {
-                    Logger.info("Player was killed!");
-                    this.onPlayerKilled.notify();
-                    this.stopGame();
-                } else {
-                    Logger.info("Player survived attack.");
-                    c.returnToSpawn();
-                }
-            }, attackTimeout * 1000);
-        }, config.attackTTK * 1000);
-    }
+		let attackTimeout = config.attackSecsElapsed - config.attackTTK;
+		setTimeout(() => {  // initial TTK timeout, (wait for TTK to elapse)
+			// try to kill at beginning and end of actual attack
+			this.tryKillPlayer();
+			setTimeout(() => {
+				this.tryKillPlayer();
 
-    private tryKillPlayer() {
-        if (!this.isPlayerHidden) {
-            this.isPlayerKilled = true;
-        }
-    }
+				if (this.isPlayerKilled) {
+					Logger.info("Player was killed!");
+					this.onPlayerKilled.notify();
+					this.stopGame();
+				} else {
+					Logger.info("Player survived attack.");
+					c.returnToSpawn();
+				}
+			}, attackTimeout * 1000);
+		}, config.attackTTK * 1000);
+	}
+
+	private tryKillPlayer() {
+		if (!this.isPlayerHidden) {
+			this.isPlayerKilled = true;
+		}
+	}
 }
