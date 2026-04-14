@@ -8,8 +8,11 @@ Logger.setMinlevel("trace");
 // Initialize the game
 const game = new GameStateMgr();
 
-// Start the loop
-game.runGame();
+// Start the loop or read from file
+let gameSave = await getGameSave();
+if (!gameSave || !game.loadGame(gameSave)) {	// try to load game
+	game.runGame();	// just start a new game if that fails
+}
 
 Logger.info("Game is initialized and running.");
 
@@ -32,4 +35,10 @@ function setMapVisibility(targetLayer: number): void {
 
 	map1.style.display = mapVisibilityLayer == 1 ? 'block' : 'none';
 	map2.style.display = mapVisibilityLayer == 2 ? 'block' : 'none';
+}
+
+async function getGameSave() {
+	const res = await fetch('/api/save');
+	if (res) return await res.json();
+	else return null
 }

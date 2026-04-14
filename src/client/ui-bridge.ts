@@ -66,6 +66,7 @@ function updateTimer(hour: number, el: HTMLElement) {
         hour = 12;
     }
     el.innerText = `${hour}:00`;
+    Logger.trace("Update timer: " + hour);
 }
 
 function updateRoomDisplay(room: Room) {

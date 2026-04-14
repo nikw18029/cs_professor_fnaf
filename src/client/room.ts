@@ -137,8 +137,4 @@ export class Room {
 	}
 
 	public get visitorCount() { return this.visitors.size; }
-
-	public extractState() {
-		throw Error("Room.extractState is not implemented.");
-	}
 }

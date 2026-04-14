@@ -94,7 +94,8 @@ export class Character {
 		this.spriteElement.style.display = isVisible ? 'block' : 'none';
     }
 
-    private moveInto(newRoom: Room) {
+    /** I'd really rather this be private. Try not to call this if you can help it. */
+    public moveInto(newRoom: Room) {
         this.currentRoom.visitorExit(this);
         newRoom.visitorEnter(this);
         this.currentRoom = newRoom;
@@ -145,4 +146,20 @@ export class Character {
         this.moveInto(this.spawnRoom);
         this.activate();
     }
+
+    /**@returns an object with details needed to run the character in a loaded game */
+    public extractState(): CharacterState {
+        return {
+            name: this.name,
+            AI_LVL: this.AI_LVL,
+            currentRoomName: this.currentRoom.roomName
+        }
+    }
+}
+
+/**The state of a character at a given moment in time */
+export interface CharacterState {
+    name: string,
+    AI_LVL: number,
+    currentRoomName: string,  // when loading make sure to MOVE character into this room rather than just setting the current room explicitly
 }

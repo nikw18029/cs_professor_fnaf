@@ -1,3 +1,4 @@
+import { CharacterState } from "./character.js"
 import { Room } from "./room.js"
 import { Character } from "./character.js"
 import { Logger } from "./logger.js"
@@ -6,6 +7,7 @@ import { initializeRoomRenderer } from "./room-renderer.js"
 import { Observable } from "./observable.js"
 
 import config from "./config.js"
+import { start } from "repl"
 
 /**
  * The orchestrator for the game
@@ -133,8 +135,11 @@ export class GameStateMgr {
 
 	/**
 	 * Starts up each character, runs a timer.
+	 * @param startHour - the hour from which to start the game from. use when loading games
 	 */
-	public async runGame() {
+	public async runGame(startHour: GameHour = 0) {
+		this.onTimerUpdate.notify(startHour);
+
 		const gameDurationMins = (config.gameMins as number) * 60000;
 		const hourInterval = gameDurationMins / 6;
 
@@ -149,12 +154,46 @@ export class GameStateMgr {
 				if (hour === 6) {
 					this.stopGame();
 				} else {
+					this.saveCurrentState(hour);
 					runHour(hour + 1, interval);
 				}
 			}, interval);
 		};
 
-		runHour(1, hourInterval);
+		runHour(startHour + 1, hourInterval);
+	}
+
+	/**Initializes character positions from a saved state and ALSO starts the game. */
+	public loadGame(gameState: GameState): boolean {
+		Logger.trace("Attempting to load from game state")
+
+		if (gameState.playerKilled) {
+			Logger.warn("Tried to load a game in which the player had already been killed.");
+			return false;
+		}	
+		
+		// move each character into the right room
+		gameState.characterStates.forEach((cs) => {
+			let wasAbleToLoad = false;
+			for (const c of this.characters) {	// nab character
+				if (c.name == cs.name) {
+					for (const r of this.rooms) { // nab room
+						if (r.roomName == cs.currentRoomName) {
+							c.moveInto(r);
+							wasAbleToLoad = true;
+						}
+					}
+				}
+			}
+
+			if (!wasAbleToLoad) {
+				Logger.warn("Failed to load a character from state: " + cs + " -- character will start at their spawn if they exist");
+			}
+		});
+
+		this.runGame(gameState.currentHour); // start game
+		Logger.info("Loaded game from existing state.")
+		return true
 	}
 
 	/**
@@ -250,6 +289,39 @@ export class GameStateMgr {
 	private tryKillPlayer() {
 		if (!this.isPlayerHidden) {
 			this.isPlayerKilled = true;
+			this.saveCurrentState(0);
 		}
 	}
+
+	private async saveCurrentState(currHour: number) {
+		Logger.debug("Saving the current game state.");
+
+		if (currHour > 5 || currHour < 0) throw new Error("The current hour passed in is invalid");
+
+		let characterStates: CharacterState[] = [];
+		
+		this.characters.forEach((c) => {
+			characterStates.push(c.extractState())
+		});
+
+		const state = {
+			playerKilled: this.isPlayerKilled,
+			currentHour: currHour,
+			characterStates
+		}
+		
+		await fetch('/api/save', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(state)
+		});
+	}
+}
+
+type GameHour = 0 | 1 | 2 | 3 | 4 | 5
+
+interface GameState {
+	playerKilled: boolean,
+	currentHour: GameHour,
+	characterStates: CharacterState[]
 }
