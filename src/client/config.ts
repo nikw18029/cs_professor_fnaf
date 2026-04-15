@@ -3,7 +3,7 @@ let config = {
   "sandro": 2,
   "ohl": 4,
   "bilitski": 2,
-  "deepak": 5,
+  "deepak": 1,
   "moveDelay": 5,
   "attackSecsElapsed": 5, // number of seconds which characters will be in the attack state
   "attackTTK": 2,  // "Time to kill" how long the player has to hide before they are killed in an attack

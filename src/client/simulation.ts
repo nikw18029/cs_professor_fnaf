@@ -39,6 +39,6 @@ function setMapVisibility(targetLayer: number): void {
 
 async function getGameSave() {
 	const res = await fetch('/api/save');
-	if (res) return await res.json();
+	if (res.ok) return await res.json();
 	else return null
 }
