@@ -51,8 +51,12 @@ export class GameStateMgr {
 			.setCharacterPosition(this.BILITSKI_KEY, { x: 41, y: 56, z: 0.45 })
 			.setCharacterPosition(this.OHL_KEY, { x: 47, y: 60, z: -2 })
 			.setCharacterPosition(this.DEEPAK_KEY, { x: 8, y: 58, z: 0.6 });
-		const classroomB = new Room("class a", 1) // TODO Replace with picture of classroom b
-			.setPosition(75, 60);
+		const classroomB = new Room("class b", 1)
+			.setPosition(75, 60)
+			.setCharacterPosition(this.SANDRO_KEY, { x: 40, y: 60, z: -2 })
+			.setCharacterPosition(this.BILITSKI_KEY, { x: 38, y: 50, z: 0.8 })
+			.setCharacterPosition(this.OHL_KEY, { x: 52, y: 48, z: 0.5 })
+			.setCharacterPosition(this.DEEPAK_KEY, { x: 8, y: 58, z: 2 });
 		const wingA = new Room("wing a", 1)
 			.setPosition(35, 50)
 			.setCharacterPosition(this.SANDRO_KEY, { x: -5, y: 40, z: 3 })
