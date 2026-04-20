@@ -119,7 +119,7 @@ export class GameStateMgr {
 				this.stopHiding(false);
 			}
 		});
-		bindUI(this.rooms, this.onTimerUpdate, this.onHideToggled, this.onHideStateChanged, this.onPlayerKilled);
+		bindUI(this.rooms, this.onTimerUpdate, this.onHideStateChanged, this.onPlayerKilled);
 
 		// characters and attack observers
 		let sandro = new Character(this.SANDRO_KEY, classroomA, [classroomA, wingA, this.playerRoom]);
