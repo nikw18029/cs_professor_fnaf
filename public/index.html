@@ -13,16 +13,7 @@
 <body>
 	<div id="interface-elements">
 		<div id="status-bar">Time: <span id="timer">12:00</span></div>
-		<!-- button to move to log in page -->
-		<button type="button" onclick="window.location.href='login.html'"> Log in </button>
-		<!-- showing what user is currently logged in on the game page
-		<p>Logged in as: <span id="current-user">Not logged in</span></p>
-		does not currently work because we need some server storage
-		-->
-
-		<div id="controls">
-			<button id="hide-btn">HIDE UNDER DESK</button>
-		</div>
+		<button id="hide-btn">HIDE UNDER DESK</button>
 	</div>
 
 
@@ -35,6 +26,16 @@
 			<div class="map-layer" id="map-layer-1"></div>
 			<div class="map-layer" id="map-layer-2"></div>
 		</div>
+	</div>
+
+	<div id="controls">
+		<span class="control">1 - First Floor</span>
+		<span class="control">2 - Second Floor</span>
+		<span class="control">H - Toggle Hide</span>
+	</div>
+
+	<div id="audio-clips">
+		<audio src="audio/6 AM.mp3" id="win-audio"></audio>
 	</div>
 </body>
 

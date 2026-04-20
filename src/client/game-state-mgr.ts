@@ -206,6 +206,9 @@ export class GameStateMgr {
 		if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
 		this.characters.forEach(c => c.stop());
 		Logger.info("Game stopped");
+
+		const winAudio: HTMLAudioElement = document.querySelector('#win-audio') as HTMLAudioElement;
+		winAudio.play();
 	}
 
 	private startHiding() {
