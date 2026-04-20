@@ -95,7 +95,6 @@ This file currently styles the room display. Needs to be updated at some point.
 }
 
 #hide-btn {
-	display: none;
 	padding: 15px 30px;
 	font-weight: bold;
 	background: #444;
