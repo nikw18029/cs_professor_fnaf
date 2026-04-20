@@ -56,6 +56,7 @@ export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, hideS
 function showDeathMessage() {
 	const div = document.createElement('div') as HTMLDivElement;
 	div.textContent = "YOU DIED";
+	div.classList.add('game-result');
 	div.style = "color: red; font-size: xx-large;";
 	document.getElementById("game-container")?.appendChild(div);
 }

@@ -207,6 +207,12 @@ export class GameStateMgr {
 		this.characters.forEach(c => c.stop());
 		Logger.info("Game stopped");
 
+		const div = document.createElement('div') as HTMLDivElement;
+		div.textContent = "YOU WIN!";
+		div.classList.add('game-result');
+		div.style = "color: rgb(26, 255, 0); font-size: xx-large;";
+		document.getElementById("game-container")?.appendChild(div);
+
 		const winAudio: HTMLAudioElement = document.querySelector('#win-audio') as HTMLAudioElement;
 		winAudio.play();
 	}
