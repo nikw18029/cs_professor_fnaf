@@ -2,12 +2,16 @@ import { Character } from "./character.js";
 import { Room } from "./room.js"
 import { Vector3 } from "./vector3.js";
 
+
+let initialRoom: Room;
+let currentRoom: Room; // The current room we're renderering
+
 /**
  * 
  * @param initialRoom The initial room to draw
  * @param newCharacters The set of all characters to subscribe to
  */
-export function initializeRoomRenderer(initialRoom: Room, newCharacters: Set<Character>) {
+export function initializeRoomRenderer(initRoom: Room, newCharacters: Set<Character>) {
 	// Subscribe to changes from characters
 	newCharacters.forEach(character => {
 		characters.add(character);
@@ -16,12 +20,16 @@ export function initializeRoomRenderer(initialRoom: Room, newCharacters: Set<Cha
 		});
 	});
 
+	initialRoom = initRoom;
+	resetRoom();
+}
+
+export function resetRoom() {
 	// Initial redraw
 	setCurrentRoom(initialRoom);
 }
 
 const staticImageElement: HTMLImageElement = document.querySelector('#room-static') as HTMLImageElement;
-let currentRoom: Room; // The current room we're renderering
 const characters: Set<Character> = new Set([]); // Set of characters to listen to
 
 /**

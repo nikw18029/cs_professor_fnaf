@@ -3,6 +3,7 @@
 import { GameStateMgr } from "./game-state-mgr.js";
 import { Logger } from "./logger.js";
 import { Observable } from "./observable.js";
+import { resetRoom } from "./room-renderer.js";
 
 Logger.setMinlevel("trace");
 
@@ -40,6 +41,9 @@ function setMapVisibility(targetLayer: number): void {
 
 	map1.style.display = mapVisibilityLayer == 1 ? 'block' : 'none';
 	map2.style.display = mapVisibilityLayer == 2 ? 'block' : 'none';
+
+	if (mapVisibilityLayer == 0)
+		resetRoom();
 }
 
 function hideBtnClicked(el: HTMLElement, updator: Observable<boolean>) {
