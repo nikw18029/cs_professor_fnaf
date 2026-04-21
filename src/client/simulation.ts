@@ -63,9 +63,3 @@ function hideBtnClicked(el: HTMLElement, updator: Observable<boolean>) {
 		el.textContent = "YOU ARE HIDING"
 	}
 }
-
-async function getGameSave() {
-	const res = await fetch('/api/save');
-	if (res.ok) return await res.json();
-	else return null
-}

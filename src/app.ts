@@ -1,5 +1,5 @@
 import express from "express";
-import gameRoute from "./routes/game.js";
+import initRoute from "./routes/init.js";
 import saveApi from "./api/saves.js"
 import cookieParser from "cookie-parser";
 import { MongoClient } from 'mongodb';
@@ -17,9 +17,10 @@ app.locals.db = db;
 
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.static('public')); // Statically serve pages
+app.use(express.static('public', { index: false })); // Statically serve pages, don't auto serve index
 app.use(express.static('dist/client')); // Statically serve JS files
 app.use('/api/save', saveApi);
+app.use('/', initRoute);    // client initialization logic. This serves the first html page
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

@@ -40,21 +40,21 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/", async (req: Request, res: Response) => {
+export async function loadSaveForClient(req: Request, res: Response) {
+  const clientId = getClientId(req, res);
+  const db: Db = req.app.locals.db;
+  const doc = await db.collection(COLLECTION).findOne({ clientId });
+  return doc?.state ?? null;
+}
+
+router.get('/', async (req, res) => {
   try {
-    const clientId = getClientId(req, res);
-    const db: Db = req.app.locals.db;
-
-    const doc = await db.collection(COLLECTION).findOne({ clientId });
-
-    if (!doc) {
-      return res.status(404).json(null);
-    }
-
-    res.json(doc.state);
+    const state = await loadSaveForClient(req, res);
+    if (!state) return res.status(404).json(null);
+    res.json(state);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to load game state" });
+    res.status(500).json({ error: 'Failed to load game state' });
   }
 });
 

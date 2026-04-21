@@ -140,10 +140,13 @@ export class GameStateMgr {
 	}
 
 	/**
-	 * Starts up each character, runs a timer.
+	 * Starts a new game. Starts up each character, runs a timer.
 	 * @param startHour - the hour from which to start the game from. use when loading games
 	 */
 	public async runGame(startHour: GameHour = 0) {
+		// todo: grab difficulties from session storage
+
+
 		this.onTimerUpdate.notify(startHour);
 
 		const gameDurationMins = (config.gameMins as number) * 60000;
