@@ -5,24 +5,38 @@
 	<title>CS Professors FNAF</title>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<link rel="stylesheet" href="styles.css" />
-	<script defer src="game.js"></script>
+	<link rel="stylesheet" href="map.css" />
+	<link rel="stylesheet" href="game.css" />
+	<script type="module" defer src="simulation.js"></script>
 </head>
 
 <body>
-	<!-- button to move to log in page -->
-	<button type="button" onclick="window.location.href='login.html'"> Log in </button>
+	<div id="interface-elements">
+		<div id="status-bar">Time: <span id="timer">12:00</span></div>
+		<button id="hide-btn">HIDE UNDER DESK</button>
+	</div>
 
-	<!-- showing what user is currently logged in on the game page
-	<p>Logged in as: <span id="current-user">Not logged in</span></p>
-	does not currently work because we need some server storage
- 	-->
 
-	<main>
-		<div id="room" class="game-screen">
-			<img id="room-img" />
+	<div id="game-container">
+		<div id="game-screen">
+			<img src="img/static.png" id="room-static" class="room-img" />
 		</div>
-	</main>
+
+		<div id="map-screen">
+			<div class="map-layer" id="map-layer-1"></div>
+			<div class="map-layer" id="map-layer-2"></div>
+		</div>
+	</div>
+
+	<div id="controls">
+		<span class="control">1 - First Floor</span>
+		<span class="control">2 - Second Floor</span>
+		<span class="control">H - Toggle Hide</span>
+	</div>
+
+	<div id="audio-clips">
+		<audio src="audio/6 AM.mp3" id="win-audio"></audio>
+	</div>
 </body>
 
 </html>

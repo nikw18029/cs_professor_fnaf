@@ -1,0 +1,185 @@
+:root {
+  --bg: #0d0906;
+  --panel: #1a120c;
+  --panel-edge: #2a1d12;
+  --ink: #e8d9b8;
+  --ink-dim: #8a7a5c;
+  --accent: #c43d2a;
+  --accent-glow: rgba(196, 61, 42, 0.4);
+  --btn: #2f1f15;
+  --btn-hover: #3d2a1c;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Special Elite', 'Courier New', monospace;
+  padding: 2.5rem 1.5rem 4rem;
+  background-attachment: fixed;
+}
+
+main { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; }
+
+h1 {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  text-align: center;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent-glow), 0 2px 0 #000;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--ink-dim);
+  letter-spacing: 0.3em;
+  font-size: 0.85rem;
+  margin-bottom: 2.5rem;
+  text-transform: uppercase;
+}
+
+.roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.start-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
+}
+
+.start-btn {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--btn);
+  border: 1px solid var(--accent);
+  padding: 1rem 3rem;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.15s ease;
+}
+
+.start-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 30px var(--accent), 0 0 60px var(--accent-glow);
+}
+
+.start-btn:active { transform: translateY(1px); }
+
+.card {
+  background: rgba(63, 0, 0, 0.5);
+  border: 1px solid var(--panel-edge);
+  border-radius: 4px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.portrait {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #000;
+  border: 1px solid var(--panel-edge);
+  background-size: cover;
+  background-position: center;
+  filter: saturate(0.85) contrast(1.1);
+}
+
+.name {
+  font-family: 'Cinzel', serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--ink);
+}
+
+.selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 1.25rem;
+  font-family: 'VT323', monospace;
+  background: var(--btn);
+  color: var(--ink);
+  border: 1px solid var(--panel-edge);
+  border-radius: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+  user-select: none;
+}
+
+.btn:hover { background: var(--btn-hover); border-color: var(--accent); }
+.btn:active { background: var(--accent); color: #fff; }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn:disabled:hover { background: var(--btn); border-color: var(--panel-edge); }
+
+.value {
+  font-family: 'VT323', monospace;
+  font-size: 2rem;
+  min-width: 2.5rem;
+  text-align: center;
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent-glow);
+  line-height: 1;
+}
+
+.value.max { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { text-shadow: 0 0 8px var(--accent-glow); }
+  50% { text-shadow: 0 0 20px var(--accent), 0 0 4px #fff; }
+}
+
+.prompt {
+  min-height: calc(100vh - 6.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+ 
+.prompt-text {
+  font-family: 'Special Elite', 'Courier New', monospace;
+  font-size: 1.25rem;
+  color: var(--ink);
+  max-width: 40rem;
+  margin: 1.5rem auto 2.75rem;
+  line-height: 1.6;
+}
+ 
+.prompt-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
