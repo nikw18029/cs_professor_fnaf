@@ -67,7 +67,10 @@ characters.forEach((_, i) => render(i));
 
 // Start button
 document.getElementById('start')?.addEventListener('click', () => {
-    let levels = characters.map((c, i) => ({ name: c.name, level: state[i] ?? 0 }));
+    const levels: Record<string, number> = Object.fromEntries(  // save levels as a map in sesh store
+        characters.map((c, i) => [c.name.toLowerCase(), state[i] ?? 0])
+    );
     sessionStorage.setItem('AI_LVLs', JSON.stringify(levels));
+    sessionStorage.removeItem('gameSave');  // rm game save so gsm knows not to load, do here for absolute assurance
     window.location.href = 'index.html';
 });

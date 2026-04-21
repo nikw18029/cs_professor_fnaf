@@ -22,9 +22,7 @@ export class Character {
 
 	constructor(name: string, spawnRoom: Room, preferredRooms: Room[]) {
 		const raw = sessionStorage.getItem('AI_LVLs');
-		const lvls: Record<string, number> = raw
-			? Object.fromEntries(JSON.parse(raw).map((d: { name: string; level: number }) => [d.name.toLowerCase(), d.level]))
-			: {};
+		const lvls: Record<string, number> = JSON.parse(sessionStorage.getItem('AI_LVLs') ?? '{}');
 
 		this.name = name;
 		this.preferredRooms = new Set(preferredRooms);
@@ -122,7 +120,7 @@ export class Character {
 		if (!this.active) return;
 		let waitSecs = config.moveDelay * 1000;
 
-		Logger.debug(`${this.name} activated. Move interval: ${waitSecs}`);
+		Logger.debug(`${this.name} activated. Move interval: ${waitSecs}, AI Level: ${this.AI_LVL}`);
 
 		while (this.active) {
 			await new Promise(res => setTimeout(res, waitSecs));
@@ -157,7 +155,6 @@ export class Character {
 	public extractState(): CharacterState {
 		return {
 			name: this.name,
-			AI_LVL: this.AI_LVL,
 			currentRoomName: this.currentRoom.roomName
 		}
 	}
@@ -166,6 +163,5 @@ export class Character {
 /**The state of a character at a given moment in time */
 export interface CharacterState {
 	name: string,
-	AI_LVL: number,
 	currentRoomName: string,  // when loading make sure to MOVE character into this room rather than just setting the current room explicitly
 }

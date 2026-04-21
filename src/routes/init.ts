@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     try {
         const save = await loadSaveForClient(req, res); // need to pass in req for cookies
-        const file = save ? 'load-game.html' : 'new-game.html';
+        const file = !save?.playerKilled ? 'load-game.html' : 'new-game.html';
         res.sendFile(path.join(process.cwd(), 'public', file));
     } catch (err) {
         console.error(err);

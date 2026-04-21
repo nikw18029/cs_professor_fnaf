@@ -10,12 +10,12 @@ Logger.setMinlevel("trace");
 // Initialize the game
 const game = new GameStateMgr();
 
-// Start the loop or read from file
-// let gameSave = await getGameSave();
-// if (!gameSave || !game.loadGame(gameSave)) {	// try to load game
-// 	game.runGame();	// just start a new game if that fails
-// }
-game.runGame();
+// Start the loop
+let gameSave = sessionStorage.getItem('gameSave') ? JSON.parse(sessionStorage.getItem('gameSave') || "oops") : null;
+console.log(gameSave);
+if (!gameSave || !game.loadGame(gameSave)) {	// try to load game
+	game.runGame();	// just start a new game if that fails
+}
 
 Logger.info("Game is initialized and running.");
 
@@ -62,10 +62,4 @@ function hideBtnClicked(el: HTMLElement, updator: Observable<boolean>) {
 		el.classList.add('active');
 		el.textContent = "YOU ARE HIDING"
 	}
-}
-
-async function getGameSave() {
-	const res = await fetch('/api/save');
-	if (res.ok) return await res.json();
-	else return null
 }

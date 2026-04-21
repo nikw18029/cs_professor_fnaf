@@ -144,9 +144,6 @@ export class GameStateMgr {
 	 * @param startHour - the hour from which to start the game from. use when loading games
 	 */
 	public async runGame(startHour: GameHour = 0) {
-		// todo: grab difficulties from session storage
-
-
 		this.onTimerUpdate.notify(startHour);
 
 		const gameDurationMins = (config.gameMins as number) * 60000;
@@ -306,6 +303,7 @@ export class GameStateMgr {
 		if (currHour > 5 || currHour < 0) throw new Error("The current hour passed in is invalid");
 
 		let characterStates: CharacterState[] = [];
+		let lvls = JSON.parse(sessionStorage.getItem('AI_LVLs') ?? '{}');
 
 		this.characters.forEach((c) => {
 			characterStates.push(c.extractState())
@@ -314,7 +312,8 @@ export class GameStateMgr {
 		const state = {
 			playerKilled: this.isPlayerKilled,
 			currentHour: currHour,
-			characterStates
+			characterStates,
+			AI_LVLs: lvls
 		}
 
 		await fetch('/api/save', {
@@ -330,5 +329,6 @@ type GameHour = 0 | 1 | 2 | 3 | 4 | 5
 interface GameState {
 	playerKilled: boolean,
 	currentHour: GameHour,
-	characterStates: CharacterState[]
+	characterStates: CharacterState[],
+	AI_LVLs: Map<string, number>
 }
