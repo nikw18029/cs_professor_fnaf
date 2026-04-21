@@ -67,7 +67,7 @@ characters.forEach((_, i) => render(i));
 
 // Start button
 document.getElementById('start')?.addEventListener('click', () => {
-    let difficulties = characters.map((c, i) => ({ name: c.name, level: state[i] ?? 0 }));
-    sessionStorage.setItem('difficulties', JSON.stringify(difficulties));
+    let levels = characters.map((c, i) => ({ name: c.name, level: state[i] ?? 0 }));
+    sessionStorage.setItem('AI_LVLs', JSON.stringify(levels));
     window.location.href = 'index.html';
 });

@@ -3,6 +3,7 @@ import { Logger } from "./logger.js"
 import config from "./config.js"
 import { Observable } from "./observable.js";
 import { Vector3 } from "./vector3.js";
+import { diff } from "util";
 
 /**
  * A character that can move and trigger an attack
@@ -20,9 +21,14 @@ export class Character {
 	private spriteElement!: HTMLImageElement;
 
 	constructor(name: string, spawnRoom: Room, preferredRooms: Room[]) {
+		const raw = sessionStorage.getItem('AI_LVLs');
+		const lvls: Record<string, number> = raw
+			? Object.fromEntries(JSON.parse(raw).map((d: { name: string; level: number }) => [d.name.toLowerCase(), d.level]))
+			: {};
+
 		this.name = name;
 		this.preferredRooms = new Set(preferredRooms);
-		this.AI_LVL = config[this.name as keyof typeof config] as number;    // ****
+		this.AI_LVL = lvls[this.name.toLowerCase()] || 0;
 		this.spawnRoom = spawnRoom;
 
 		this.currentRoom = spawnRoom;
