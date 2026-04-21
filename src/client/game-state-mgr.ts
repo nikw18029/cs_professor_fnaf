@@ -19,6 +19,7 @@ export class GameStateMgr {
 	onTimerUpdate: Observable<number>;
 	hourTimerID: ReturnType<typeof setTimeout> | null = null;
 	onPlayerKilled: Observable<void>;
+	onWin: Observable<void>;
 	isPlayerKilled: boolean = false;
 
 	// hide tracking
@@ -37,6 +38,7 @@ export class GameStateMgr {
 
 	constructor() {
 		this.onPlayerKilled = new Observable();
+		this.onWin = new Observable();
 
 		// Build Map
 		const backEntry = new Room("back entry", 1)
@@ -119,7 +121,7 @@ export class GameStateMgr {
 				this.stopHiding(false);
 			}
 		});
-		bindUI(this.rooms, this.onTimerUpdate, this.onHideStateChanged, this.onPlayerKilled);
+		bindUI(this.rooms, this.onTimerUpdate, this.onHideStateChanged, this.onPlayerKilled, this.onWin);
 
 		// characters and attack observers
 		let sandro = new Character(this.SANDRO_KEY, classroomA, [classroomA, wingA, this.playerRoom]);
@@ -157,6 +159,7 @@ export class GameStateMgr {
 
 				if (hour === 6) {
 					this.stopGame();
+					this.onWin.notify();
 				} else {
 					this.saveCurrentState(hour);
 					runHour(hour + 1, interval);
@@ -206,15 +209,6 @@ export class GameStateMgr {
 		if (this.cooldownTimer) clearTimeout(this.cooldownTimer);
 		this.characters.forEach(c => c.stop());
 		Logger.info("Game stopped");
-
-		const div = document.createElement('div') as HTMLDivElement;
-		div.textContent = "YOU WIN!";
-		div.classList.add('game-result');
-		div.style = "color: rgb(26, 255, 0); font-size: xx-large;";
-		document.getElementById("game-container")?.appendChild(div);
-
-		const winAudio: HTMLAudioElement = document.querySelector('#win-audio') as HTMLAudioElement;
-		winAudio.play();
 	}
 
 	private startHiding() {

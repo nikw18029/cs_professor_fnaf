@@ -11,10 +11,11 @@ Logger.setMinlevel("trace");
 const game = new GameStateMgr();
 
 // Start the loop or read from file
-let gameSave = await getGameSave();
-if (!gameSave || !game.loadGame(gameSave)) {	// try to load game
-	game.runGame();	// just start a new game if that fails
-}
+// let gameSave = await getGameSave();
+// if (!gameSave || !game.loadGame(gameSave)) {	// try to load game
+// 	game.runGame();	// just start a new game if that fails
+// }
+game.runGame();
 
 Logger.info("Game is initialized and running.");
 
@@ -46,6 +47,7 @@ function setMapVisibility(targetLayer: number): void {
 		resetRoom();
 }
 
+// hide button stuff controlled by the player, not the system
 function hideBtnClicked(el: HTMLElement, updator: Observable<boolean>) {
 	if (el.hasAttribute('disabled')) return;    // block on cooldown
 
@@ -53,12 +55,12 @@ function hideBtnClicked(el: HTMLElement, updator: Observable<boolean>) {
 		Logger.trace("Hide toggled off");
 		updator.notify(false);
 		el.classList.remove('active');
-		el.textContent = "HIDE UNDER DESK";
+		el.textContent = "PRESS H TO HIDE";
 	} else {    // off -> on
 		Logger.trace("Hide toggled on");
 		updator.notify(true);
 		el.classList.add('active');
-		el.textContent = "STOP HIDING"
+		el.textContent = "YOU ARE HIDING"
 	}
 }
 

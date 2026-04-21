@@ -4,21 +4,21 @@ import { Logger } from "./logger.js"
 
 // bind the html elements to their object counterparts.
 
-export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, hideStateUpdator: Observable<{ canHide: boolean; forceUnhide: boolean }>, playerKilledUpdator: Observable<void>) {
+export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, hideStateUpdator: Observable<{ canHide: boolean; forceUnhide: boolean }>, playerKilledUpdator: Observable<void>, winUpdator: Observable<void>) {
 	// timer
 	const timerEl = document.getElementById("timer");
 	if (timerEl) {
 		timerUpdator.subscribe((hour) => { updateTimer(hour, timerEl); });
 	}
 
-	// hide button
+	// hide button game state logic (actions controlled by system)
 	const hideBtn = document.getElementById('hide-btn');
 	if (hideBtn) {
 
 		hideStateUpdator.subscribe(({ canHide, forceUnhide }) => {
 			if (forceUnhide) {
 				hideBtn.classList.remove('active');
-				hideBtn.textContent = "HIDE UNDER DESK";
+				hideBtn.textContent = "PRESS H TO HIDE";
 			}
 
 			if (canHide) {
@@ -51,6 +51,9 @@ export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, hideS
 
 	// player killed
 	playerKilledUpdator.subscribe(showDeathMessage);
+
+	// win
+	winUpdator.subscribe(showWinMessage);
 }
 
 function showDeathMessage() {
@@ -59,6 +62,17 @@ function showDeathMessage() {
 	div.classList.add('game-result');
 	div.style = "color: red; font-size: xx-large;";
 	document.getElementById("game-container")?.appendChild(div);
+}
+
+function showWinMessage() {
+	const div = document.createElement('div') as HTMLDivElement;
+	div.textContent = "YOU WIN!";
+	div.classList.add('game-result');
+	div.style = "color: rgb(26, 255, 0); font-size: xx-large;";
+	document.getElementById("game-container")?.appendChild(div);
+
+	const winAudio: HTMLAudioElement = document.querySelector('#win-audio') as HTMLAudioElement;
+	winAudio.play();
 }
 
 function updateTimer(hour: number, el: HTMLElement) {
