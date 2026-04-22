@@ -26,7 +26,7 @@ export class Character {
 	private readonly BASE_SCALE_FACTOR: number = 20;
 	private readonly ATTACK_END_POSITION: Vector3 = { x: 0, y: 0, z: 150 / this.BASE_SCALE_FACTOR };
 	private readonly JUMPSCARE_FPS: number = 1000 / 30;
-	private readonly ATTACK_ANIMATION_LENGTH: number = 1 * 1000;
+	private readonly ATTACK_ANIMATION_LENGTH: number = .4 * 1000;
 	private readonly ATTACK_DELAY: number = 1.5 * 1000;
 
 	constructor(name: string, spawnRoom: Room, preferredRooms: Room[]) {
@@ -61,6 +61,7 @@ export class Character {
 
 	public startAttack(): void {
 		this.attackStartPosition = this.currentPosition;
+		this.currentPosition = { x: this.attackStartPosition.x, y: this.attackStartPosition.y, z: this.attackStartPosition.z };
 
 		this.attackTimer = 0;
 		this.isAttacking = true;
