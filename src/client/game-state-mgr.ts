@@ -131,8 +131,8 @@ export class GameStateMgr {
 		this.characters = new Set([sandro, ohl, bilitski, deepak]);
 
 		for (const c of this.characters) {
-			c.onAttack.subscribe((attacker) => {
-				this.handleAttack(attacker);
+			c.onAttack.subscribe((character) => {
+				this.tryKillPlayer(character);
 			});
 		}
 
@@ -266,35 +266,20 @@ export class GameStateMgr {
 		}, cooldownMs);
 	}
 
-	private handleAttack(c: Character) {
-		if (this.isPlayerKilled) return;
-
-		Logger.info(`${c.name} is attacking!`);
-
-		let attackTimeout = config.attackSecsElapsed - config.attackTTK;
-		setTimeout(() => {  // initial TTK timeout, (wait for TTK to elapse)
-			// try to kill at beginning and end of actual attack
-			this.tryKillPlayer();
-			setTimeout(() => {
-				this.tryKillPlayer();
-
-				if (this.isPlayerKilled) {
-					Logger.info("Player was killed!");
-					this.onPlayerKilled.notify();
-					this.stopGame();
-				} else {
-					Logger.info("Player survived attack.");
-					c.returnToSpawn();
-				}
-			}, attackTimeout * 1000);
-		}, config.attackTTK * 1000);
-	}
-
-	private tryKillPlayer() {
-		if (!this.isPlayerHidden) {
-			this.isPlayerKilled = true;
-			this.saveCurrentState(0);
+	private tryKillPlayer(character: Character) {
+		if (this.isPlayerHidden) {
+			character.returnToSpawn(); // Send attacker back to spawn
+			Logger.info("Player survived attack.");
+			return;
 		}
+
+		this.isPlayerKilled = true;
+		this.onPlayerKilled.notify();
+		this.saveCurrentState(0);
+		this.stopGame();
+
+		Logger.info("Player was killed!");
+		// TODO Play audio based on character
 	}
 
 	private async saveCurrentState(currHour: number) {
