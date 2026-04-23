@@ -85,9 +85,8 @@ This file currently styles the room display. Needs to be updated at some point.
 #controls {
 	position: absolute;
 	top: 0;
-	left: 5%;
-	width: 80%;
-	margin: auto;
+	left: 25%;
+	width: 50%;
 	height: 5%;
 	display: flex;
 	align-items: center;
