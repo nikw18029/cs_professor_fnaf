@@ -55,7 +55,7 @@ export class Character {
 		this.spriteElement.src = `img/${this.name}.png`;
 		this.spriteElement.classList.add("character-sprite");
 
-		const parent: HTMLElement = document.querySelector("#game-screen") as HTMLElement;
+		const parent: HTMLElement = document.querySelector("#img-screen") as HTMLElement;
 		parent.appendChild(this.spriteElement);
 	}
 

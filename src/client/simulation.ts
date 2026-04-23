@@ -24,7 +24,6 @@ Logger.info("Game is initialized and running.");
 let mapVisibilityLayer: number = 0;
 const map1: HTMLDivElement = document.querySelector('#map-layer-1') as HTMLDivElement;
 const map2: HTMLDivElement = document.querySelector('#map-layer-2') as HTMLDivElement;
-const hideBtn: HTMLElement = document.querySelector('#hide-btn') as HTMLElement;
 
 setMapVisibility(0); // Start hidden
 document.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -33,8 +32,8 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
 	else if (e.key == '2')
 		setMapVisibility(2);
 
-	if (e.key == 'h')
-		hideBtnClicked(hideBtn, game.onHideToggled);
+	if (e.key == 'h' && !e.repeat)
+		game.attemptHideToggle();
 });
 
 function setMapVisibility(targetLayer: number): void {
@@ -45,21 +44,4 @@ function setMapVisibility(targetLayer: number): void {
 
 	if (mapVisibilityLayer == 0)
 		resetRoom();
-}
-
-// hide button stuff controlled by the player, not the system
-function hideBtnClicked(el: HTMLElement, updator: Observable<boolean>) {
-	if (el.hasAttribute('disabled')) return;    // block on cooldown
-
-	if (el.classList.contains('active')) {   // on -> off
-		Logger.trace("Hide toggled off");
-		updator.notify(false);
-		el.classList.remove('active');
-		el.textContent = "PRESS H TO HIDE";
-	} else {    // off -> on
-		Logger.trace("Hide toggled on");
-		updator.notify(true);
-		el.classList.add('active');
-		el.textContent = "YOU ARE HIDING"
-	}
 }

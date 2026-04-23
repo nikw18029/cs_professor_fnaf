@@ -211,6 +211,19 @@ export class GameStateMgr {
 		Logger.info("Game stopped");
 	}
 
+	public attemptHideToggle() {
+		// hide button stuff controlled by the player, not the system
+		if (this.hideCooldownActive) return;    // block on cooldown
+
+		if (this.isPlayerHidden) {   // on -> off
+			Logger.trace("Hide toggled off");
+			this.onHideToggled.notify(false);
+		} else {    // off -> on
+			Logger.trace("Hide toggled on");
+			this.onHideToggled.notify(true);
+		}
+	}
+
 	private startHiding() {
 		if (this.hideCooldownActive) {
 			Logger.trace("Hide blocked — on cooldown");

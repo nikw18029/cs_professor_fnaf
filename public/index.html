@@ -13,8 +13,6 @@
 <body>
 	<div id="interface-elements">
 		<div id="status-bar">Time: <span id="timer">12:00</span></div>
-		<button id="hide-btn">HIDE UNDER DESK</button>
-
 		<div id="controls">
 			<span class="control">1 - First Floor</span>
 			<span class="control">2 - Second Floor</span>
@@ -25,7 +23,13 @@
 
 	<div id="game-container">
 		<div id="game-screen">
-			<img src="img/static.png" id="room-static" class="room-img" />
+			<div id="img-screen">
+				<img src="img/static.png" id="room-static" class="room-img" />
+			</div>
+
+			<div id="hide-bar">
+				<div id="hide-bar-fill"></div>
+			</div>
 		</div>
 
 		<div id="map-screen">
