@@ -7,7 +7,6 @@ import { initializeRoomRenderer } from "./room-renderer.js"
 import { Observable } from "./observable.js"
 
 import config from "./config.js"
-import { start } from "repl"
 
 /**
  * The orchestrator for the game
@@ -24,8 +23,6 @@ export class GameStateMgr {
 
 	// hide tracking
 	isPlayerHidden: boolean = false;
-	onHideToggled: Observable<boolean>;
-	onHideStateChanged: Observable<{ canHide: boolean; forceUnhide: boolean }>;
 	private hideStartTime: number = 0;
 	private forceUnhideTimer: ReturnType<typeof setTimeout> | null = null;
 	private cooldownTimer: ReturnType<typeof setTimeout> | null = null;
@@ -111,17 +108,7 @@ export class GameStateMgr {
 
 		// bind to html
 		this.onTimerUpdate = new Observable<number>();
-		this.onHideToggled = new Observable<boolean>();
-		this.onHideStateChanged = new Observable<{ canHide: boolean; forceUnhide: boolean }>();
-
-		this.onHideToggled.subscribe((wantsToHide) => {
-			if (wantsToHide) {
-				this.startHiding();
-			} else {
-				this.stopHiding(false);
-			}
-		});
-		bindUI(this.rooms, this.onTimerUpdate, this.onHideStateChanged, this.onPlayerKilled, this.onWin);
+		bindUI(this.rooms, this.onTimerUpdate, this.onPlayerKilled, this.onWin);
 
 		// characters and attack observers
 		let sandro = new Character(this.SANDRO_KEY, classroomA, [classroomA, wingA, this.playerRoom]);
@@ -168,6 +155,15 @@ export class GameStateMgr {
 		};
 
 		runHour(startHour + 1, hourInterval);
+
+		const hideBar = () => {
+			this.hourTimerID = setTimeout(() => {
+				this.processHideBar();
+				hideBar();
+			}, this.BAR_FPS);
+		};
+
+		hideBar();
 	}
 
 	/**Initializes character positions from a saved state and ALSO starts the game. */
@@ -217,11 +213,45 @@ export class GameStateMgr {
 
 		if (this.isPlayerHidden) {   // on -> off
 			Logger.trace("Hide toggled off");
-			this.onHideToggled.notify(false);
+			this.stopHiding(false);
 		} else {    // off -> on
 			Logger.trace("Hide toggled on");
-			this.onHideToggled.notify(true);
+			this.startHiding();
 		}
+	}
+
+	private previousBarTimestamp: number = Date.now();
+	private barValue: number = config.hideTimeMaxSecs * 1000;
+	private readonly barElement: HTMLDivElement = document.querySelector('#hide-bar-fill') as HTMLDivElement;
+	private readonly barText: HTMLElement = document.querySelector('#hide-text') as HTMLElement;
+	private readonly BAR_FPS: number = 1000 / 15;
+	private readonly HIDE_COOLDOWN_FACTOR: number = 2.0;
+	public processHideBar() {
+		let deltaTime: number = Date.now() - this.previousBarTimestamp;
+		if (this.hideCooldownActive)
+			this.barValue += deltaTime / this.HIDE_COOLDOWN_FACTOR;
+		else if (this.isPlayerHidden)
+			this.barValue -= deltaTime;
+		else
+			this.barValue = config.hideTimeMaxSecs * 1000;
+
+		let ratio: number = (this.barValue / config.hideTimeMaxSecs) * 0.001;
+		this.barElement.style.width = `${100 * (ratio)}%`;
+		this.barElement.style.backgroundColor = this.getBarColor(ratio);
+		this.previousBarTimestamp = Date.now();
+	}
+
+	private getBarColor(ratio: number): string {
+		if (ratio < 0.25)
+			return 'rgb(100, 0, 0)';
+
+		if (ratio < 0.5)
+			return 'rgb(160, 120, 0)';
+
+		if (ratio < 0.75)
+			return 'rgb(25, 100, 0)';
+
+		return 'rgb(0, 0, 100)';
 	}
 
 	private startHiding() {
@@ -232,6 +262,7 @@ export class GameStateMgr {
 
 		this.isPlayerHidden = true;
 		this.hideStartTime = Date.now();
+		this.barText.textContent = 'HIDING FROM PROFESSORS...';
 		Logger.trace("Player started hiding");
 
 		// force-stop after max duration
@@ -256,25 +287,20 @@ export class GameStateMgr {
 		const hideDurationSecs = (Date.now() - this.hideStartTime) / 1000;
 		Logger.trace(`Player hid for ${hideDurationSecs.toFixed(1)}s`);
 
-		// tell UI to reset the button
-		if (forced) {
-			this.onHideStateChanged.notify({ canHide: false, forceUnhide: true });
-		}
-
 		// start cooldown scaled to how long player hid
 		this.startCooldown(hideDurationSecs);
 	}
 
 	private startCooldown(hideDurationSecs: number) {
-		const cooldownMs = hideDurationSecs * 2 * 1000;
+		const cooldownMs = hideDurationSecs * this.HIDE_COOLDOWN_FACTOR * 1000;
 		this.hideCooldownActive = true;
-		this.onHideStateChanged.notify({ canHide: false, forceUnhide: false });
+		this.barText.textContent = 'TAKING A BREATHER...';
 		Logger.trace(`Hide cooldown: ${(cooldownMs / 1000).toFixed(1)}s`);
 
 		this.cooldownTimer = setTimeout(() => {
 			this.hideCooldownActive = false;
 			this.cooldownTimer = null;
-			this.onHideStateChanged.notify({ canHide: true, forceUnhide: false });
+			this.barText.textContent = 'READY';
 			Logger.trace("Hide cooldown ended");
 		}, cooldownMs);
 	}

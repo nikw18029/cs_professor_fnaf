@@ -4,31 +4,11 @@ import { Logger } from "./logger.js"
 
 // bind the html elements to their object counterparts.
 
-export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, hideStateUpdator: Observable<{ canHide: boolean; forceUnhide: boolean }>, playerKilledUpdator: Observable<void>, winUpdator: Observable<void>) {
+export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, playerKilledUpdator: Observable<void>, winUpdator: Observable<void>) {
 	// timer
 	const timerEl = document.getElementById("timer");
 	if (timerEl) {
 		timerUpdator.subscribe((hour) => { updateTimer(hour, timerEl); });
-	}
-
-	// hide button game state logic (actions controlled by system)
-	const hideBtn = document.getElementById('hide-btn');
-	if (hideBtn) {
-
-		hideStateUpdator.subscribe(({ canHide, forceUnhide }) => {
-			if (forceUnhide) {
-				hideBtn.classList.remove('active');
-				hideBtn.textContent = "PRESS H TO HIDE";
-			}
-
-			if (canHide) {
-				hideBtn.classList.remove('on-cooldown');
-				hideBtn.removeAttribute('disabled');
-			} else {
-				hideBtn.classList.add('on-cooldown');
-				hideBtn.setAttribute('disabled', 'true');
-			}
-		});
 	}
 
 	// rooms

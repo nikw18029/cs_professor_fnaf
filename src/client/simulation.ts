@@ -2,7 +2,6 @@
 
 import { GameStateMgr } from "./game-state-mgr.js";
 import { Logger } from "./logger.js";
-import { Observable } from "./observable.js";
 import { resetRoom } from "./room-renderer.js";
 
 Logger.setMinlevel("trace");
