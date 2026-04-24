@@ -8,7 +8,7 @@ const characters = [
 	{ name: "Sandro", img: "img/sandro.png" },
 ];
 
-const state = characters.map(() => 0);
+const state = characters.map(() => 8);
 
 const roster = document.getElementById('roster');
 
