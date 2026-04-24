@@ -17,7 +17,7 @@ export class GameStateMgr {
 	playerRoom: Room;
 	onTimerUpdate: Observable<number>;
 	hourTimerID: ReturnType<typeof setTimeout> | null = null;
-	onPlayerKilled: Observable<void>;
+	onPlayerKilled: Observable<Character>;
 	onWin: Observable<void>;
 	isPlayerKilled: boolean = false;
 
@@ -313,7 +313,7 @@ export class GameStateMgr {
 		}
 
 		this.isPlayerKilled = true;
-		this.onPlayerKilled.notify();
+		this.onPlayerKilled.notify(character);
 		this.saveCurrentState(0);
 		this.stopGame();
 
