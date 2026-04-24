@@ -147,7 +147,9 @@ export class GameStateMgr {
 				if (hour === 6) {
 					this.saveCurrentState(0);
 					this.stopGame();
+					this.deleteSave();
 					this.onWin.notify();
+					return;
 				} else {
 					this.saveCurrentState(hour);
 					runHour(hour + 1, interval);
@@ -169,7 +171,7 @@ export class GameStateMgr {
 
 	/**Initializes character positions from a saved state and ALSO starts the game. */
 	public loadGame(gameState: GameState): boolean {
-		if (!gameState || gameState.playerKilled) return false;
+		if (!gameState) return false;
 
 		Logger.trace("Attempting to load from game state");
 
@@ -315,7 +317,7 @@ export class GameStateMgr {
 
 		this.isPlayerKilled = true;
 		this.onPlayerKilled.notify(character);
-		this.saveCurrentState(0);
+		this.deleteSave();
 		this.stopGame();
 
 		Logger.info("Player was killed!");
@@ -334,7 +336,6 @@ export class GameStateMgr {
 		});
 
 		const state = {
-			playerKilled: this.isPlayerKilled,
 			currentHour: currHour,
 			characterStates,
 			AI_LVLs: lvls
@@ -346,12 +347,16 @@ export class GameStateMgr {
 			body: JSON.stringify(state)
 		});
 	}
+
+	private async deleteSave() {
+		Logger.debug("Deleting save.");
+		await fetch('/api/save', { method: 'DELETE' });
+	}
 }
 
 type GameHour = 0 | 1 | 2 | 3 | 4 | 5
 
 interface GameState {
-	playerKilled: boolean,
 	currentHour: GameHour,
 	characterStates: CharacterState[],
 	AI_LVLs: Map<string, number>

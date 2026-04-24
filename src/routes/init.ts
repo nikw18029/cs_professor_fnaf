@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
         } else if (user == 'guest') res.sendFile(path.join(process.cwd(), 'public', 'new-game.html'));  // guest send to new game
 
         const save = await loadSaveForClient(req, user.userId); // try get save
-        const file = save && !save.playerKilled ? 'load-game.html' : 'new-game.html';   // depending on if we get a save load or new game send
+        const file = save ? 'load-game.html' : 'new-game.html';   // depending on if we get a save load or new game send
         res.sendFile(path.join(process.cwd(), 'public', file));
     } catch (err) {
         console.error(err);

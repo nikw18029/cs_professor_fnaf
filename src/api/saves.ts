@@ -38,9 +38,24 @@ router.get('/', async (req, res) => {
   }
 });
 
-export async function loadSaveForClient(req: Request, id: string) { // load from mongo
+router.delete('/', async (req, res) => {
+  try {
+    const { userId } = (req as any).user as AuthPayload;
+    const db: Db = req.app.locals.db;
+
+    const result = await db.collection(COLLECTION).deleteOne({ userId });
+    if (result.deletedCount === 0) return res.status(404).json({ error: 'No save to delete' });
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete game state' });
+  }
+});
+
+export async function loadSaveForClient(req: Request, userId: string) { // load from mongo
   const db: Db = req.app.locals.db;
-  const doc = await db.collection(COLLECTION).findOne({ id });
+  const doc = await db.collection(COLLECTION).findOne({ userId });
   return doc?.state ?? null;
 }
 
