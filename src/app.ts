@@ -1,6 +1,7 @@
 import express from "express";
 import initRoute from "./routes/init.js";
 import saveApi from "./api/saves.js"
+import authApi from "./api/auth.js";
 import cookieParser from "cookie-parser";
 import { MongoClient } from 'mongodb';
 
@@ -19,6 +20,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.static('public', { index: false })); // Statically serve pages, don't auto serve index
 app.use(express.static('dist/client')); // Statically serve JS files
+app.use('/api/auth', authApi);
 app.use('/api/save', saveApi);
 app.use('/', initRoute);    // client initialization logic. This serves the first html page
 

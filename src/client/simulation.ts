@@ -12,7 +12,6 @@ const game = new GameStateMgr();
 
 // Start the loop
 let gameSave = sessionStorage.getItem('gameSave') ? JSON.parse(sessionStorage.getItem('gameSave') || "oops") : null;
-console.log(gameSave);
 if (!gameSave || !game.loadGame(gameSave)) {	// try to load game
 	game.runGame();	// just start a new game if that fails
 	game.onPlayerKilled.subscribe((_character) => {
@@ -61,3 +60,10 @@ function finishGame() {
 	isReadingInputs = false;
 	setMapVisibility(0);
 }
+
+// logout
+document.getElementById('logout-btn')?.addEventListener('click', async () => {
+	try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {}
+	sessionStorage.clear();
+	window.location.href = '/';
+});
