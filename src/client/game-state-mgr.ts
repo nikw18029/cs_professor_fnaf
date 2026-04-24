@@ -111,10 +111,10 @@ export class GameStateMgr {
 		bindUI(this.rooms, this.onTimerUpdate, this.onPlayerKilled, this.onWin);
 
 		// characters and attack observers
-		let sandro = new Character(this.SANDRO_KEY, classroomA, [classroomA, wingA, this.playerRoom]);
+		let sandro = new Character(this.SANDRO_KEY, classroomA, [classroomA, upperHall, this.playerRoom]);
 		let ohl = new Character(this.OHL_KEY, classroomB, [lowerStairs, this.playerRoom]);
 		let bilitski = new Character(this.BILITSKI_KEY, backEntry, [classroomA, this.playerRoom]);
-		let deepak = new Character(this.DEEPAK_KEY, offices, [offices, this.playerRoom]);
+		let deepak = new Character(this.DEEPAK_KEY, offices, [offices, classroomB, backEntry, this.playerRoom]);
 		this.characters = new Set([sandro, ohl, bilitski, deepak]);
 
 		for (const c of this.characters) {
@@ -145,6 +145,7 @@ export class GameStateMgr {
 				this.onTimerUpdate.notify(hour);
 
 				if (hour === 6) {
+					this.saveCurrentState(0);
 					this.stopGame();
 					this.onWin.notify();
 				} else {
@@ -318,7 +319,6 @@ export class GameStateMgr {
 		this.stopGame();
 
 		Logger.info("Player was killed!");
-		// TODO Play audio based on character
 	}
 
 	private async saveCurrentState(currHour: number) {
