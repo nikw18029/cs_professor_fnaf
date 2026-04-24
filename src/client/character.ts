@@ -25,9 +25,10 @@ export class Character {
 	private attackStartPosition: Vector3 = { x: 0, y: 0, z: 0 };
 	private readonly BASE_SCALE_FACTOR: number = 20;
 	private readonly ATTACK_END_POSITION: Vector3 = { x: 0, y: 0, z: 150 / this.BASE_SCALE_FACTOR };
-	private readonly JUMPSCARE_FPS: number = 1000 / 30;
-	private readonly ATTACK_ANIMATION_LENGTH: number = .4 * 1000;
-	private readonly ATTACK_DELAY: number = 1.5 * 1000;
+	private readonly JUMPSCARE_FPS: number = 1000 / 60;
+	private readonly ATTACK_ANIMATION_LENGTH: number = .3 * 1000;
+	private readonly ATTACK_MIN_DELAY: number = .2 * 1000;
+	private readonly ATTACK_MAX_DELAY: number = 1.5 * 1000;
 
 	constructor(name: string, spawnRoom: Room, preferredRooms: Room[]) {
 		const lvls: Record<string, number> = JSON.parse(sessionStorage.getItem('AI_LVLs') ?? '{}');
@@ -195,9 +196,10 @@ export class Character {
 
 				if (nextRoom.isPlayerRoom && !nextRoom.hasVisitors()) {
 					this.moveInto(nextRoom);
+					const attackDelay = this.lerp(this.ATTACK_MIN_DELAY, this.ATTACK_MAX_DELAY, Math.random());
 					setTimeout(() => {
 						this.startAttack(); // Start attacking
-					}, this.ATTACK_DELAY);
+					}, attackDelay);
 					break;  // break or else we could move again while in the player's room, will reactivate when sent back to spawn by game mgr
 				} else if (!nextRoom.isPlayerRoom) {
 					this.moveInto(nextRoom);
