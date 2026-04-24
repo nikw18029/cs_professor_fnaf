@@ -1,6 +1,8 @@
 #game-container {
 	background-color: black;
 	overflow: hidden;
+	display: flex;
+	height: 100%;
 }
 
 #game-screen {
@@ -9,6 +11,7 @@
 	width: 50%;
 	aspect-ratio: 4 / 3;
 	margin-left: 25%;
+	margin-top: 5%;
 	position: absolute;
 	overflow: hidden;
 }

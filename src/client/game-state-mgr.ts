@@ -100,7 +100,7 @@ export class GameStateMgr {
 			.setCharacterPosition(this.BILITSKI_KEY, { x: 42, y: 40, z: 1 })
 			.setCharacterPosition(this.OHL_KEY, { x: 42, y: 40, z: 1 })
 			.setCharacterPosition(this.DEEPAK_KEY, { x: 42, y: 40, z: 1 });
-		upperStairs.connectNeighbors([upperHall, lowerStairs, this.playerRoom]);
+		upperStairs.connectNeighbors([upperHall, lowerStairs]);
 		upperHall.connectNeighbors([offices, backEntry, this.playerRoom]);
 
 		this.rooms = new Set([backEntry, classroomA, wingA, classroomB, lowerStairs,
