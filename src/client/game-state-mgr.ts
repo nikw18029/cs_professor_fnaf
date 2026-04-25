@@ -71,7 +71,7 @@ export class GameStateMgr {
 
 		classroomA.connectNeighbors([wingA]);
 		classroomB.connectNeighbors([lowerStairs]);
-		wingA.connectNeighbors([classroomA, lowerStairs]);
+		wingA.connectNeighbors([classroomA, lowerStairs, backEntry]);
 		backEntry.connectNeighbors([lowerStairs]);
 		lowerStairs.connectNeighbors([backEntry, wingA, classroomB]);
 
@@ -111,8 +111,8 @@ export class GameStateMgr {
 		bindUI(this.rooms, this.onTimerUpdate, this.onPlayerKilled, this.onWin);
 
 		// characters and attack observers
-		let sandro = new Character(this.SANDRO_KEY, classroomA, [classroomA, upperHall, this.playerRoom]);
-		let ohl = new Character(this.OHL_KEY, classroomB, [lowerStairs, this.playerRoom]);
+		let sandro = new Character(this.SANDRO_KEY, classroomA, [lowerStairs, upperStairs, upperHall, this.playerRoom]);
+		let ohl = new Character(this.OHL_KEY, classroomB, [lowerStairs, upperStairs, upperHall, this.playerRoom]);
 		let bilitski = new Character(this.BILITSKI_KEY, backEntry, [classroomA, this.playerRoom]);
 		let deepak = new Character(this.DEEPAK_KEY, offices, [offices, classroomB, backEntry, this.playerRoom]);
 		this.characters = new Set([sandro, ohl, bilitski, deepak]);
