@@ -7,7 +7,6 @@ import { initializeRoomRenderer } from "./room-renderer.js"
 import { Observable } from "./observable.js"
 
 import config from "./config.js"
-import { start } from "repl"
 
 /**
  * The orchestrator for the game
@@ -18,14 +17,12 @@ export class GameStateMgr {
 	playerRoom: Room;
 	onTimerUpdate: Observable<number>;
 	hourTimerID: ReturnType<typeof setTimeout> | null = null;
-	onPlayerKilled: Observable<void>;
+	onPlayerKilled: Observable<Character>;
 	onWin: Observable<void>;
 	isPlayerKilled: boolean = false;
 
 	// hide tracking
 	isPlayerHidden: boolean = false;
-	onHideToggled: Observable<boolean>;
-	onHideStateChanged: Observable<{ canHide: boolean; forceUnhide: boolean }>;
 	private hideStartTime: number = 0;
 	private forceUnhideTimer: ReturnType<typeof setTimeout> | null = null;
 	private cooldownTimer: ReturnType<typeof setTimeout> | null = null;
@@ -74,7 +71,7 @@ export class GameStateMgr {
 
 		classroomA.connectNeighbors([wingA]);
 		classroomB.connectNeighbors([lowerStairs]);
-		wingA.connectNeighbors([classroomA, lowerStairs]);
+		wingA.connectNeighbors([classroomA, lowerStairs, backEntry]);
 		backEntry.connectNeighbors([lowerStairs]);
 		lowerStairs.connectNeighbors([backEntry, wingA, classroomB]);
 
@@ -103,7 +100,7 @@ export class GameStateMgr {
 			.setCharacterPosition(this.BILITSKI_KEY, { x: 42, y: 40, z: 1 })
 			.setCharacterPosition(this.OHL_KEY, { x: 42, y: 40, z: 1 })
 			.setCharacterPosition(this.DEEPAK_KEY, { x: 42, y: 40, z: 1 });
-		upperStairs.connectNeighbors([upperHall, lowerStairs, this.playerRoom]);
+		upperStairs.connectNeighbors([upperHall, lowerStairs]);
 		upperHall.connectNeighbors([offices, backEntry, this.playerRoom]);
 
 		this.rooms = new Set([backEntry, classroomA, wingA, classroomB, lowerStairs,
@@ -111,28 +108,18 @@ export class GameStateMgr {
 
 		// bind to html
 		this.onTimerUpdate = new Observable<number>();
-		this.onHideToggled = new Observable<boolean>();
-		this.onHideStateChanged = new Observable<{ canHide: boolean; forceUnhide: boolean }>();
-
-		this.onHideToggled.subscribe((wantsToHide) => {
-			if (wantsToHide) {
-				this.startHiding();
-			} else {
-				this.stopHiding(false);
-			}
-		});
-		bindUI(this.rooms, this.onTimerUpdate, this.onHideStateChanged, this.onPlayerKilled, this.onWin);
+		bindUI(this.rooms, this.onTimerUpdate, this.onPlayerKilled, this.onWin);
 
 		// characters and attack observers
-		let sandro = new Character(this.SANDRO_KEY, classroomA, [classroomA, wingA, this.playerRoom]);
-		let ohl = new Character(this.OHL_KEY, classroomB, [lowerStairs, this.playerRoom]);
+		let sandro = new Character(this.SANDRO_KEY, classroomA, [lowerStairs, upperStairs, upperHall, this.playerRoom]);
+		let ohl = new Character(this.OHL_KEY, classroomB, [lowerStairs, upperStairs, upperHall, this.playerRoom]);
 		let bilitski = new Character(this.BILITSKI_KEY, backEntry, [classroomA, this.playerRoom]);
-		let deepak = new Character(this.DEEPAK_KEY, offices, [offices, this.playerRoom]);
+		let deepak = new Character(this.DEEPAK_KEY, offices, [offices, classroomB, backEntry, this.playerRoom]);
 		this.characters = new Set([sandro, ohl, bilitski, deepak]);
 
 		for (const c of this.characters) {
-			c.onAttack.subscribe((attacker) => {
-				this.handleAttack(attacker);
+			c.onAttack.subscribe((character) => {
+				this.tryKillPlayer(character);
 			});
 		}
 
@@ -158,8 +145,11 @@ export class GameStateMgr {
 				this.onTimerUpdate.notify(hour);
 
 				if (hour === 6) {
+					this.saveCurrentState(0);
 					this.stopGame();
+					this.deleteSave();
 					this.onWin.notify();
+					return;
 				} else {
 					this.saveCurrentState(hour);
 					runHour(hour + 1, interval);
@@ -168,11 +158,20 @@ export class GameStateMgr {
 		};
 
 		runHour(startHour + 1, hourInterval);
+
+		const hideBar = () => {
+			this.hourTimerID = setTimeout(() => {
+				this.processHideBar();
+				hideBar();
+			}, this.BAR_FPS);
+		};
+
+		hideBar();
 	}
 
 	/**Initializes character positions from a saved state and ALSO starts the game. */
 	public loadGame(gameState: GameState): boolean {
-		if (!gameState || gameState.playerKilled) return false;
+		if (!gameState) return false;
 
 		Logger.trace("Attempting to load from game state");
 
@@ -211,6 +210,53 @@ export class GameStateMgr {
 		Logger.info("Game stopped");
 	}
 
+	public attemptHideToggle() {
+		// hide button stuff controlled by the player, not the system
+		if (this.hideCooldownActive) return;    // block on cooldown
+
+		if (this.isPlayerHidden) {   // on -> off
+			Logger.trace("Hide toggled off");
+			this.stopHiding(false);
+		} else {    // off -> on
+			Logger.trace("Hide toggled on");
+			this.startHiding();
+		}
+	}
+
+	private previousBarTimestamp: number = Date.now();
+	private barValue: number = config.hideTimeMaxSecs * 1000;
+	private readonly barElement: HTMLDivElement = document.querySelector('#hide-bar-fill') as HTMLDivElement;
+	private readonly barText: HTMLElement = document.querySelector('#hide-text') as HTMLElement;
+	private readonly BAR_FPS: number = 1000 / 15;
+	private readonly HIDE_COOLDOWN_FACTOR: number = 2.0;
+	public processHideBar() {
+		let deltaTime: number = Date.now() - this.previousBarTimestamp;
+		if (this.hideCooldownActive)
+			this.barValue += deltaTime / this.HIDE_COOLDOWN_FACTOR;
+		else if (this.isPlayerHidden)
+			this.barValue -= deltaTime;
+		else
+			this.barValue = config.hideTimeMaxSecs * 1000;
+
+		let ratio: number = (this.barValue / config.hideTimeMaxSecs) * 0.001;
+		this.barElement.style.width = `${100 * (ratio)}%`;
+		this.barElement.style.backgroundColor = this.getBarColor(ratio);
+		this.previousBarTimestamp = Date.now();
+	}
+
+	private getBarColor(ratio: number): string {
+		if (ratio < 0.25)
+			return 'rgb(100, 0, 0)';
+
+		if (ratio < 0.5)
+			return 'rgb(160, 120, 0)';
+
+		if (ratio < 0.75)
+			return 'rgb(25, 100, 0)';
+
+		return 'rgb(0, 0, 100)';
+	}
+
 	private startHiding() {
 		if (this.hideCooldownActive) {
 			Logger.trace("Hide blocked — on cooldown");
@@ -219,6 +265,7 @@ export class GameStateMgr {
 
 		this.isPlayerHidden = true;
 		this.hideStartTime = Date.now();
+		this.barText.textContent = 'HIDING FROM PROFESSORS...';
 		Logger.trace("Player started hiding");
 
 		// force-stop after max duration
@@ -243,58 +290,37 @@ export class GameStateMgr {
 		const hideDurationSecs = (Date.now() - this.hideStartTime) / 1000;
 		Logger.trace(`Player hid for ${hideDurationSecs.toFixed(1)}s`);
 
-		// tell UI to reset the button
-		if (forced) {
-			this.onHideStateChanged.notify({ canHide: false, forceUnhide: true });
-		}
-
 		// start cooldown scaled to how long player hid
 		this.startCooldown(hideDurationSecs);
 	}
 
 	private startCooldown(hideDurationSecs: number) {
-		const cooldownMs = hideDurationSecs * 2 * 1000;
+		const cooldownMs = hideDurationSecs * this.HIDE_COOLDOWN_FACTOR * 1000;
 		this.hideCooldownActive = true;
-		this.onHideStateChanged.notify({ canHide: false, forceUnhide: false });
+		this.barText.textContent = 'TAKING A BREATHER...';
 		Logger.trace(`Hide cooldown: ${(cooldownMs / 1000).toFixed(1)}s`);
 
 		this.cooldownTimer = setTimeout(() => {
 			this.hideCooldownActive = false;
 			this.cooldownTimer = null;
-			this.onHideStateChanged.notify({ canHide: true, forceUnhide: false });
+			this.barText.textContent = 'READY';
 			Logger.trace("Hide cooldown ended");
 		}, cooldownMs);
 	}
 
-	private handleAttack(c: Character) {
-		if (this.isPlayerKilled) return;
-
-		Logger.info(`${c.name} is attacking!`);
-
-		let attackTimeout = config.attackSecsElapsed - config.attackTTK;
-		setTimeout(() => {  // initial TTK timeout, (wait for TTK to elapse)
-			// try to kill at beginning and end of actual attack
-			this.tryKillPlayer();
-			setTimeout(() => {
-				this.tryKillPlayer();
-
-				if (this.isPlayerKilled) {
-					Logger.info("Player was killed!");
-					this.onPlayerKilled.notify();
-					this.stopGame();
-				} else {
-					Logger.info("Player survived attack.");
-					c.returnToSpawn();
-				}
-			}, attackTimeout * 1000);
-		}, config.attackTTK * 1000);
-	}
-
-	private tryKillPlayer() {
-		if (!this.isPlayerHidden) {
-			this.isPlayerKilled = true;
-			this.saveCurrentState(0);
+	private tryKillPlayer(character: Character) {
+		if (this.isPlayerHidden) {
+			character.returnToSpawn(); // Send attacker back to spawn
+			Logger.info("Player survived attack.");
+			return;
 		}
+
+		this.isPlayerKilled = true;
+		this.onPlayerKilled.notify(character);
+		this.deleteSave();
+		this.stopGame();
+
+		Logger.info("Player was killed!");
 	}
 
 	private async saveCurrentState(currHour: number) {
@@ -310,7 +336,6 @@ export class GameStateMgr {
 		});
 
 		const state = {
-			playerKilled: this.isPlayerKilled,
 			currentHour: currHour,
 			characterStates,
 			AI_LVLs: lvls
@@ -322,12 +347,16 @@ export class GameStateMgr {
 			body: JSON.stringify(state)
 		});
 	}
+
+	private async deleteSave() {
+		Logger.debug("Deleting save.");
+		await fetch('/api/save', { method: 'DELETE' });
+	}
 }
 
 type GameHour = 0 | 1 | 2 | 3 | 4 | 5
 
 interface GameState {
-	playerKilled: boolean,
 	currentHour: GameHour,
 	characterStates: CharacterState[],
 	AI_LVLs: Map<string, number>

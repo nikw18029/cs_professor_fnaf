@@ -11,7 +11,7 @@ document.getElementById('yes')?.addEventListener('click', async () => {
 });
 
 document.getElementById('no')?.addEventListener('click', () => {
-    console.log('Starting new game...');
+    console.log('Starting new game...');    // we could delete the old save here but we'll keep it in case player changes their mind
     window.location.href = 'new-game.html';
 });
 

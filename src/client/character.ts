@@ -19,9 +19,18 @@ export class Character {
 	public onAttack: Observable<Character>;
 	public onRoomChange: Observable<Character>;
 	private spriteElement!: HTMLImageElement;
+	private isAttacking: boolean = false;
+	private attackTimer: number = 0;
+	private currentPosition: Vector3 = { x: 0, y: 0, z: 0 };
+	private attackStartPosition: Vector3 = { x: 0, y: 0, z: 0 };
+	private readonly BASE_SCALE_FACTOR: number = 20;
+	private readonly ATTACK_END_POSITION: Vector3 = { x: 0, y: 0, z: 150 / this.BASE_SCALE_FACTOR };
+	private readonly JUMPSCARE_FPS: number = 1000 / 60;
+	private readonly ATTACK_ANIMATION_LENGTH: number = .3 * 1000;
+	private readonly ATTACK_MIN_DELAY: number = .2 * 1000;
+	private readonly ATTACK_MAX_DELAY: number = 1.5 * 1000;
 
 	constructor(name: string, spawnRoom: Room, preferredRooms: Room[]) {
-		const raw = sessionStorage.getItem('AI_LVLs');
 		const lvls: Record<string, number> = JSON.parse(sessionStorage.getItem('AI_LVLs') ?? '{}');
 
 		this.name = name;
@@ -47,8 +56,51 @@ export class Character {
 		this.spriteElement.src = `img/${this.name}.png`;
 		this.spriteElement.classList.add("character-sprite");
 
-		const parent: HTMLElement = document.querySelector("#game-screen") as HTMLElement;
+		const parent: HTMLElement = document.querySelector("#img-screen") as HTMLElement;
 		parent.appendChild(this.spriteElement);
+	}
+
+	public startAttack(): void {
+		this.attackStartPosition = this.currentPosition;
+		this.currentPosition = { x: this.attackStartPosition.x, y: this.attackStartPosition.y, z: this.attackStartPosition.z };
+
+		this.attackTimer = 0;
+		this.isAttacking = true;
+		this.animateAttack();
+		Logger.info(`${this.name} is attacking!`);
+	}
+
+	public animateAttack(): void {
+		this.attackTimer += this.JUMPSCARE_FPS;
+
+		let t: number = this.attackTimer / this.ATTACK_ANIMATION_LENGTH; // Scale ratio
+		t = Math.min(t, 1); // Clamp to [0, 1] 
+
+		// Animate the sprite
+		this.currentPosition.x = this.lerp(this.attackStartPosition.x, this.ATTACK_END_POSITION.x, t);
+		this.currentPosition.y = this.lerp(this.attackStartPosition.y, this.ATTACK_END_POSITION.y, t);
+		this.currentPosition.z = this.lerp(this.attackStartPosition.z, this.ATTACK_END_POSITION.z, t);
+		this.redrawSpritePosition();
+
+		if (this.attackTimer >= this.ATTACK_ANIMATION_LENGTH) {
+			this.applyAttack();
+			return;
+		}
+
+		setTimeout(() => {
+			this.animateAttack();
+		}, this.JUMPSCARE_FPS);
+	}
+
+	public applyAttack(): void {
+		this.attackTimer = 0;
+		this.isAttacking = false;
+		this.onAttack.notify(this);
+	}
+
+	private lerp(a: number, b: number, t: number): number {
+		// Basic linear interpolation function
+		return a + (b - a) * t;
 	}
 
 	private pickNextRoom(): Room {
@@ -90,12 +142,21 @@ export class Character {
 	 * @param position The position to draw the sprite at.
 	 */
 	public redraw(isVisible: boolean, position: Vector3) {
-		this.spriteElement.style.left = `${position.x}%`;
-		this.spriteElement.style.top = `${position.y}%`;
-		this.spriteElement.style.width = `${20 * Math.abs(position.z)}%`;
-		this.spriteElement.style.transform = `scaleX(${Math.sign(position.z)})`;
-		this.spriteElement.style.zIndex = `${Math.round(position.y * Math.abs(position.z))}`;
 		this.spriteElement.style.display = isVisible ? 'block' : 'none';
+
+		if (this.isAttacking) // Don't redraw attackers' positions
+			return;
+
+		this.currentPosition = position;
+		this.spriteElement.style.zIndex = `${Math.round(position.y * Math.abs(position.z))}`;
+		this.redrawSpritePosition();
+	}
+
+	private redrawSpritePosition() {
+		this.spriteElement.style.left = `${this.currentPosition.x}%`;
+		this.spriteElement.style.top = `${this.currentPosition.y}%`;
+		this.spriteElement.style.width = `${this.BASE_SCALE_FACTOR * Math.abs(this.currentPosition.z)}%`;
+		this.spriteElement.style.transform = `scaleX(${Math.sign(this.currentPosition.z)})`;
 	}
 
 	/** I'd really rather this be private. Try not to call this if you can help it. */
@@ -103,6 +164,7 @@ export class Character {
 		this.currentRoom.visitorExit(this);
 		newRoom.visitorEnter(this);
 		this.currentRoom = newRoom;
+		this.currentPosition = this.currentRoom.getCharacterPosition(this.name);
 		this.onRoomChange.notify(this);
 		Logger.debug(`${this.name} moved to ${newRoom.roomName}`);
 	}
@@ -126,13 +188,18 @@ export class Character {
 			await new Promise(res => setTimeout(res, waitSecs));
 			if (!this.active) break;
 
+			if (this.isAttacking) continue; // Don't try to move rooms when attacking
+
 			let roll = Math.floor(Math.random() * 20) + 1;
 			if (roll <= this.AI_LVL) {
 				let nextRoom = this.pickNextRoom();
 
 				if (nextRoom.isPlayerRoom && !nextRoom.hasVisitors()) {
 					this.moveInto(nextRoom);
-					this.onAttack.notify(this); // tell the game state manager we want to attack, it has the logic to run an attack
+					const attackDelay = this.lerp(this.ATTACK_MIN_DELAY, this.ATTACK_MAX_DELAY, Math.random());
+					setTimeout(() => {
+						this.startAttack(); // Start attacking
+					}, attackDelay);
 					break;  // break or else we could move again while in the player's room, will reactivate when sent back to spawn by game mgr
 				} else if (!nextRoom.isPlayerRoom) {
 					this.moveInto(nextRoom);

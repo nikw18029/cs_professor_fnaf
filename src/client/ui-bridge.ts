@@ -1,34 +1,15 @@
 import { Observable } from "./observable.js";
 import { Room } from "./room.js"
 import { Logger } from "./logger.js"
+import { Character } from "./character.js";
 
 // bind the html elements to their object counterparts.
 
-export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, hideStateUpdator: Observable<{ canHide: boolean; forceUnhide: boolean }>, playerKilledUpdator: Observable<void>, winUpdator: Observable<void>) {
+export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, playerKilledUpdator: Observable<Character>, winUpdator: Observable<void>) {
 	// timer
 	const timerEl = document.getElementById("timer");
 	if (timerEl) {
 		timerUpdator.subscribe((hour) => { updateTimer(hour, timerEl); });
-	}
-
-	// hide button game state logic (actions controlled by system)
-	const hideBtn = document.getElementById('hide-btn');
-	if (hideBtn) {
-
-		hideStateUpdator.subscribe(({ canHide, forceUnhide }) => {
-			if (forceUnhide) {
-				hideBtn.classList.remove('active');
-				hideBtn.textContent = "PRESS H TO HIDE";
-			}
-
-			if (canHide) {
-				hideBtn.classList.remove('on-cooldown');
-				hideBtn.removeAttribute('disabled');
-			} else {
-				hideBtn.classList.add('on-cooldown');
-				hideBtn.setAttribute('disabled', 'true');
-			}
-		});
 	}
 
 	// rooms
@@ -56,12 +37,13 @@ export function bindUI(rooms: Set<Room>, timerUpdator: Observable<number>, hideS
 	winUpdator.subscribe(showWinMessage);
 }
 
-function showDeathMessage() {
+function showDeathMessage(character : Character) {
 	const div = document.createElement('div') as HTMLDivElement;
 	div.textContent = "YOU GOT HOMEWORK";
 	div.classList.add('game-result');
 	div.style = "color: red; font-size: xx-large;";
 	document.getElementById("game-container")?.appendChild(div);
+	returnToHome(`game-over-${character.name}-audio`);
 }
 
 function showWinMessage() {
@@ -70,9 +52,20 @@ function showWinMessage() {
 	div.classList.add('game-result');
 	div.style = "color: rgb(26, 255, 0); font-size: xx-large;";
 	document.getElementById("game-container")?.appendChild(div);
+	returnToHome('win-audio');
+}
 
-	const winAudio: HTMLAudioElement = document.querySelector('#win-audio') as HTMLAudioElement;
-	winAudio.play();
+const REDIRECT_LENGTH : number = 1000;
+function returnToHome(audioID : string)
+{
+	const audio: HTMLAudioElement = document.querySelector(`#${audioID}`) as HTMLAudioElement;
+	audio.play();
+	audio.addEventListener("ended", () => 
+	{
+		setTimeout(() => {
+			window.location.href = '/';
+		}, REDIRECT_LENGTH);
+	});
 }
 
 function updateTimer(hour: number, el: HTMLElement) {

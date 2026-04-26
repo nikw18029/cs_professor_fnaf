@@ -13,13 +13,26 @@
 <body>
 	<div id="interface-elements">
 		<div id="status-bar">Time: <span id="timer">12:00</span></div>
-		<button id="hide-btn">HIDE UNDER DESK</button>
+		<div id="controls">
+			<span class="control">1 - First Floor</span>
+			<span class="control">2 - Second Floor</span>
+			<span class="control">H - Hide</span>
+			<button id="logout-btn">Logout</button>
+		</div>
 	</div>
 
 
 	<div id="game-container">
 		<div id="game-screen">
-			<img src="img/static.png" id="room-static" class="room-img" />
+			<div id="img-screen">
+				<img src="img/static.png" id="room-static" class="room-img" style="display: none;" />
+			</div>
+
+			<div id="hide-bar">
+				<div id="hide-bar-fill">
+				</div>
+				<span id="hide-text">READY</span>
+			</div>
 		</div>
 
 		<div id="map-screen">
@@ -28,14 +41,12 @@
 		</div>
 	</div>
 
-	<div id="controls">
-		<span class="control">1 - First Floor</span>
-		<span class="control">2 - Second Floor</span>
-		<span class="control">H - Toggle Hide</span>
-	</div>
-
 	<div id="audio-clips">
 		<audio src="audio/6 AM.mp3" id="win-audio"></audio>
+		<audio src="audio/game over sandro.mp3" id="game-over-sandro-audio"></audio>
+		<audio src="audio/game over bilitski.mp3" id="game-over-bilitski-audio"></audio>
+		<audio src="audio/game over ohl.mp3" id="game-over-ohl-audio"></audio>
+		<audio src="audio/game over deepak.mp3" id="game-over-deepak-audio"></audio>
 	</div>
 </body>
 

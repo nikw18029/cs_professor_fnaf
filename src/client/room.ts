@@ -71,7 +71,7 @@ export class Room {
 		img.style.display = 'none'; // Hide by default
 
 		// Add it to the game screen
-		document.querySelector('#game-screen')?.appendChild(img);
+		document.querySelector('#img-screen')?.appendChild(img);
 		return img;
 	}
 

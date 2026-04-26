@@ -1,60 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="login.css" />
-    <title>Sign Up / Log In</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="ui.css">
+  <style>
+    .auth-form { display: flex; flex-direction: column; gap: 0.75rem; width: min(20rem, 100%); align-items: stretch; }
+    .auth-form input {
+      font-family: 'VT323', monospace; font-size: 1.25rem;
+      background: var(--btn); color: var(--ink);
+      border: 1px solid var(--panel-edge); border-radius: 2px;
+      padding: 0.6rem 0.8rem;
+    }
+    .auth-form input:focus { outline: none; border-color: var(--accent); }
+    #error-msg { color: var(--accent); min-height: 1.2em; text-align: center; }
+  </style>
 </head>
 <body>
-    <button id =back-btn type="button" onClick="window.location.href='index.html'"> Back to Game </button>
-    <div id="login-page">
-        <h1>Log In</h1>
-        <label>Email:<br><input type="email" id="login-email"></label>
-        <label>Password:<br>
-            <div class="password-wrapper">
-                <input type="password" id="login-password">
-                <span class="toggle-pw" onclick="togglePassword(this)">
-                    <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                </span>
-            </div>
-        </label>
-        <div> <button id="login-btn">Log In</button> </div>
-        <p id="login-error"></p>
-        <p>Don't have an account? <a href="#" id="show-signup">Sign up</a></p>
+  <main class="prompt">
+    <h1>Helpdesk Shift at Blackington</h1>
+    <p class="subtitle">Sign in to continue</p>
+    <div class="auth-form">
+      <input id="username" type="text" placeholder="Username" autocomplete="username" />
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+      <div class="prompt-buttons">
+        <button type="button" class="start-btn" id="login">Log in</button>
+        <button type="button" class="start-btn" id="signup">Sign up</button>
+        <button type="button" class="start-btn" id="guest">Play as guest</button>
+      </div>
+      <p id="error-msg"></p>
     </div>
-
-    <div id="signup-page" style="display:none;">
-        <h1>Sign Up</h1>
-        <label>Name:<br><input type="text" id="signup-name"></label>
-        <label>Email:<br><input type="email" id="signup-email"></label>
-        <label>Password:<br>
-            <div class="password-wrapper">
-                <input type="password" id="signup-password">
-                <span class="toggle-pw" onclick="togglePassword(this)">
-                    <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                </span>
-            </div>
-        </label>
-        <button id="signup-btn">Sign Up</button>
-        <p id="signup-error"></p>
-        <p>Already have an account? <a href="#" id="show-login">Log in</a></p>
-    </div>
-
-    <div id="dashboard-page" style="display:none;">
-        <h1>Dashboard</h1>
-        <p>Welcome, <strong id="dash-name"></strong></p>
-        <p>Email: <span id="dash-email"></span></p>
-        <button type="button" onClick="window.location.href='index.html'"> Back to Game </button>
-        <button id="logout-btn">Log Out</button>
-    </div>
-
-    <script src="login.js"></script>
-    </body>
+  </main>
+  <script type="module" defer src="login.js"></script>
+</body>
 </html>
